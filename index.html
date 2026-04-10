@@ -2,980 +2,916 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
 <title>UNDEAD SIEGE — Zombie Survival</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
-html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;font-family:'Courier New',monospace;cursor:crosshair;user-select:none;-webkit-user-select:none;touch-action:none;}
-canvas{display:block;width:100%;height:100%;}
-#ui{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;}
-#hud{position:absolute;bottom:20px;left:0;width:100%;display:flex;justify-content:space-between;align-items:flex-end;padding:0 30px;opacity:0;transition:opacity 0.5s;}
-#hud.show{opacity:1;}
-.hud-box{background:rgba(0,0,0,0.6);border:1px solid rgba(255,60,60,0.3);padding:10px 18px;border-radius:4px;color:#ddd;font-size:14px;text-shadow:0 0 8px rgba(255,0,0,0.3);}
-.hud-box .label{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:2px;margin-bottom:4px;}
-.hud-box .value{font-size:28px;font-weight:bold;color:#ff4444;text-shadow:0 0 15px rgba(255,0,0,0.5);}
-#round-display{position:absolute;top:20px;left:50%;transform:translateX(-50%);}
-#round-display .value{font-size:22px;color:#ffcc00;text-shadow:0 0 15px rgba(255,200,0,0.5);}
-#health-bar-container{position:absolute;bottom:80px;left:50%;transform:translateX(-50%);width:200px;height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden;}
-#health-bar{width:100%;height:100%;background:linear-gradient(90deg,#ff2222,#ff4444);border-radius:3px;transition:width 0.3s;box-shadow:0 0 10px rgba(255,0,0,0.5);}
-#weapon-info{text-align:right;}
-#weapon-info .weapon-name{font-size:18px;color:#ffcc00;margin-bottom:2px;}
-#weapon-info .ammo{font-size:24px;color:#fff;}
-#points-display .value{color:#ffcc00 !important;text-shadow:0 0 15px rgba(255,200,0,0.5) !important;}
-#overlay{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.85);pointer-events:all;transition:opacity 0.5s;}
-#overlay.hidden{opacity:0;pointer-events:none;}
-#overlay h1{font-size:clamp(36px,8vw,72px);color:#ff2222;text-shadow:0 0 30px rgba(255,0,0,0.6),0 0 60px rgba(255,0,0,0.3);margin-bottom:10px;letter-spacing:6px;}
-#overlay .subtitle{font-size:clamp(12px,3vw,18px);color:#888;letter-spacing:4px;margin-bottom:40px;}
-#overlay .start-btn{background:none;border:2px solid #ff4444;color:#ff4444;padding:16px 48px;font-size:18px;font-family:'Courier New',monospace;cursor:pointer;letter-spacing:4px;text-transform:uppercase;transition:all 0.3s;pointer-events:all;}
-#overlay .start-btn:hover{background:#ff4444;color:#0a0a0a;box-shadow:0 0 30px rgba(255,68,68,0.4);}
-#overlay .stats{margin-top:30px;color:#888;font-size:14px;line-height:2;}
-#overlay .stats span{color:#ffcc00;}
-#round-announce{position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);font-size:clamp(28px,6vw,52px);color:#ff2222;text-shadow:0 0 40px rgba(255,0,0,0.8);opacity:0;pointer-events:none;letter-spacing:6px;white-space:nowrap;}
-#buy-prompt{position:absolute;top:45%;left:50%;transform:translate(-50%,-50%);font-size:14px;color:#ffcc00;text-shadow:0 0 10px rgba(255,200,0,0.5);opacity:0;pointer-events:none;letter-spacing:2px;text-align:center;}
-#damage-overlay{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;opacity:0;background:radial-gradient(ellipse at center,transparent 50%,rgba(255,0,0,0.4) 100%);transition:opacity 0.15s;}
-#mobile-controls{display:none;position:absolute;bottom:20px;left:0;width:100%;padding:0 20px;justify-content:space-between;align-items:flex-end;pointer-events:none;}
-.joystick-zone{width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.05);border:2px solid rgba(255,255,255,0.1);pointer-events:all;position:relative;}
-.joystick-knob{width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,0.2);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;}
-#shoot-btn{width:80px;height:80px;border-radius:50%;background:rgba(255,68,68,0.2);border:2px solid rgba(255,68,68,0.4);pointer-events:all;display:flex;align-items:center;justify-content:center;color:#ff4444;font-size:10px;letter-spacing:1px;}
-@media(max-width:768px){
-#mobile-controls{display:flex;}
-#hud{bottom:160px;}
-}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Courier New',monospace;user-select:none;-webkit-user-select:none}
+canvas{display:block;width:100%;height:100%;image-rendering:pixelated;cursor:crosshair}
+#overlay{position:fixed;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.92);z-index:10;transition:opacity 0.5s}
+#overlay.hidden{opacity:0;pointer-events:none}
+#overlay h1{font-size:clamp(32px,7vw,64px);color:#c00;text-shadow:0 0 30px rgba(200,0,0,0.7);letter-spacing:8px;margin-bottom:8px}
+#overlay .sub{color:#777;font-size:clamp(11px,2.5vw,16px);letter-spacing:4px;margin-bottom:36px}
+#overlay .btn{background:none;border:2px solid #c00;color:#c00;padding:14px 44px;font-size:16px;font-family:inherit;cursor:pointer;letter-spacing:4px;transition:0.3s}
+#overlay .btn:hover{background:#c00;color:#000}
+#overlay .info{color:#555;font-size:12px;margin-top:20px;letter-spacing:2px;text-align:center;line-height:1.8}
+#overlay .stats{color:#888;font-size:14px;margin-top:24px;line-height:2;text-align:center}
+#overlay .stats span{color:#fc0}
+#crosshair{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:5;color:#fff;font-size:24px;text-shadow:0 0 4px rgba(255,255,255,0.5);opacity:0.7}
+#dmg{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:4;opacity:0;background:radial-gradient(ellipse,transparent 40%,rgba(180,0,0,0.5) 100%);transition:opacity 0.12s}
 </style>
 </head>
 <body>
-<canvas id="game"></canvas>
-<div id="ui">
-<div id="hud">
-<div class="hud-box" id="points-display"><div class="label">Points</div><div class="value" id="points-val">0</div></div>
-<div class="hud-box" id="round-display"><div class="label">Round</div><div class="value" id="round-val">1</div></div>
-<div class="hud-box" id="weapon-info"><div class="weapon-name" id="weapon-name">Pistol</div><div class="ammo" id="ammo-val">8 / ∞</div></div>
-</div>
-<div id="health-bar-container" style="opacity:0;transition:opacity 0.5s;"><div id="health-bar"></div></div>
-<div id="round-announce"></div>
-<div id="buy-prompt"></div>
-<div id="damage-overlay"></div>
+<canvas id="c"></canvas>
+<div id="crosshair">+</div>
+<div id="dmg"></div>
 <div id="overlay">
 <h1>UNDEAD SIEGE</h1>
-<div class="subtitle">SURVIVE THE HORDE</div>
-<button class="start-btn" id="start-btn">ENLIST</button>
-<div style="margin-top:20px;color:#666;font-size:12px;letter-spacing:2px;">WASD + MOUSE · R TO RELOAD · E TO BUY</div>
-</div>
-<div id="mobile-controls">
-<div class="joystick-zone" id="move-stick"><div class="joystick-knob" id="move-knob"></div></div>
-<div id="shoot-btn">FIRE</div>
-<div class="joystick-zone" id="aim-stick"><div class="joystick-knob" id="aim-knob"></div></div>
-</div>
+<div class="sub">SURVIVE THE HORDE</div>
+<button class="btn" onclick="startGame()">ENLIST</button>
+<div class="info">WASD move · Mouse aim · Click shoot · R reload · E buy · Q swap</div>
 </div>
 <script>
-// ═══════════════════════════════════════════
-// UNDEAD SIEGE — Top-Down Zombie Survival
-// ═══════════════════════════════════════════
+// ══════════════════════════════════════════════════════
+//  UNDEAD SIEGE — First-Person Raycasting Zombie FPS
+// ══════════════════════════════════════════════════════
+const C=document.getElementById('c'),X=C.getContext('2d');
+const W=640,H=400; // internal render resolution
+C.width=W;C.height=H;
 
-const canvas = document.getElementById('game');
-const ctx = canvas.getContext('2d');
+// ── Audio ──
+const ACtx=window.AudioContext||window.webkitAudioContext;
+let actx;
+function audio(){if(!actx)actx=new ACtx()}
+function snd(f,t,d,v=0.2){audio();const o=actx.createOscillator(),g=actx.createGain();o.type=t;o.frequency.value=f;g.gain.setValueAtTime(v,actx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+d);o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+d)}
+function sfxShoot(){snd(800,'square',0.07,0.15);snd(200,'sawtooth',0.1,0.18)}
+function sfxShotgun(){snd(140,'sawtooth',0.14,0.25);snd(90,'square',0.18,0.18)}
+function sfxHit(){snd(300,'sine',0.08,0.12)}
+function sfxKill(){snd(110,'sawtooth',0.25,0.18)}
+function sfxHurt(){snd(180,'sawtooth',0.2,0.25)}
+function sfxReload(){snd(400,'square',0.04,0.08);setTimeout(()=>snd(500,'square',0.04,0.08),200);setTimeout(()=>snd(600,'square',0.04,0.08),400)}
+function sfxEmpty(){snd(900,'square',0.02,0.08)}
+function sfxBuy(){snd(600,'sine',0.08,0.15);setTimeout(()=>snd(900,'sine',0.08,0.15),100)}
+function sfxRound(){snd(350,'sine',0.25,0.15);setTimeout(()=>snd(500,'sine',0.25,0.15),200);setTimeout(()=>snd(700,'sine',0.35,0.15),400)}
 
-// --- Audio synthesis ---
-const AudioCtx = window.AudioContext || window.webkitAudioContext;
-let audioCtx;
-function ensureAudio(){if(!audioCtx)audioCtx=new AudioCtx();}
-function playSound(freq,type,dur,vol=0.3){
-  ensureAudio();
-  const o=audioCtx.createOscillator(),g=audioCtx.createGain();
-  o.type=type;o.frequency.setValueAtTime(freq,audioCtx.currentTime);
-  g.gain.setValueAtTime(vol,audioCtx.currentTime);
-  g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+dur);
-  o.connect(g);g.connect(audioCtx.destination);
-  o.start();o.stop(audioCtx.currentTime+dur);
+
+// ── Map (16x16 grid, 0=empty, 1-4=wall types, 5=window/barrier) ──
+const MAP=[
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+  [1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,1],
+  [1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [1,1,1,0,0,0,2,2,2,2,0,0,0,1,1,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [1,0,0,0,2,0,0,0,0,0,0,2,0,0,0,1],
+  [1,0,0,0,2,0,0,0,0,0,0,2,0,0,0,1],
+  [1,0,0,0,2,0,0,0,0,0,0,2,0,0,0,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [1,1,1,0,0,0,3,3,3,3,0,0,0,1,1,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,1],
+  [1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,1],
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+];
+const MS=16; // map size
+const TS=1;  // tile size in world units
+
+// Wall colors by type
+const WCOL=[null,'#555','#664422','#446644','#554466'];
+const WDARK=[null,'#383838','#442e16','#2e442e','#3a2e44'];
+
+// ── Procedural textures (32x32) ──
+const TEX_SIZE=32;
+function genTex(baseR,baseG,baseB,brickW,brickH){
+  const d=new Uint8Array(TEX_SIZE*TEX_SIZE*3);
+  for(let y=0;y<TEX_SIZE;y++)for(let x=0;x<TEX_SIZE;x++){
+    const i=(y*TEX_SIZE+x)*3;
+    const mortarX=(x%brickW===0);
+    const row=Math.floor(y/brickH);
+    const off=(row%2)*(brickW>>1);
+    const mortarY=(y%brickH===0);
+    const mortarXoff=((x+off)%brickW===0);
+    if(mortarY||mortarXoff){d[i]=40;d[i+1]=40;d[i+2]=40;}
+    else{const v=0.8+Math.random()*0.4;d[i]=Math.min(255,baseR*v)|0;d[i+1]=Math.min(255,baseG*v)|0;d[i+2]=Math.min(255,baseB*v)|0;}
+  }
+  return d;
 }
-function sfxShoot(){playSound(800,'square',0.08,0.15);playSound(200,'sawtooth',0.12,0.2);}
-function sfxShotgun(){playSound(150,'sawtooth',0.15,0.3);playSound(100,'square',0.2,0.2);}
-function sfxHit(){playSound(300,'sine',0.1,0.15);}
-function sfxKill(){playSound(120,'sawtooth',0.3,0.2);}
-function sfxHurt(){playSound(200,'sawtooth',0.2,0.3);}
-function sfxBuy(){playSound(600,'sine',0.1,0.2);setTimeout(()=>playSound(900,'sine',0.1,0.2),100);}
-function sfxRound(){playSound(400,'sine',0.3,0.2);setTimeout(()=>playSound(600,'sine',0.3,0.2),200);setTimeout(()=>playSound(800,'sine',0.4,0.2),400);}
-function sfxReload(){playSound(400,'square',0.05,0.1);setTimeout(()=>playSound(500,'square',0.05,0.1),150);}
-function sfxEmpty(){playSound(1000,'square',0.03,0.1);}
+const TEXTURES=[
+  null,
+  genTex(90,90,90,8,4),    // grey brick
+  genTex(100,65,30,8,6),   // brown wood
+  genTex(60,90,60,10,5),   // green stone
+  genTex(80,60,100,8,4),   // purple brick
+];
 
-// --- Resize ---
-function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
-window.addEventListener('resize',resize);resize();
-
-// --- Game State ---
-const STATE={MENU:0,PLAYING:1,ROUND_TRANSITION:2,GAME_OVER:3};
-let state=STATE.MENU;
-let camera={x:0,y:0,shake:0,shakeDecay:0.9};
-let player,zombies,bullets,particles,floatingTexts,wallBuys,barriers;
-let round,points,kills,zombiesRemaining,zombiesSpawned,maxZombiesAlive,spawnTimer;
-let roundAnnounceTimer,gameOverTimer;
-let keys={},mouseX=0,mouseY=0,mouseDown=false;
-let lastTime=0,dt=0;
-
-// --- Weapons ---
+// ── Weapons ──
 const WEAPONS={
-  pistol:{name:'Pistol',damage:30,fireRate:250,magSize:8,reloadTime:1500,spread:0.04,bullets:1,speed:18,pierce:false,auto:false,ammo:Infinity,color:'#ffcc00'},
-  smg:{name:'MP40',damage:25,fireRate:100,magSize:32,reloadTime:2200,spread:0.08,bullets:1,speed:20,pierce:false,auto:true,ammo:192,color:'#66ccff'},
-  shotgun:{name:'Trench Gun',damage:60,fireRate:600,magSize:6,reloadTime:2800,spread:0.15,bullets:6,speed:16,pierce:false,auto:false,ammo:54,color:'#ff8844'},
-  rifle:{name:'M1 Garand',damage:100,fireRate:400,magSize:8,reloadTime:2000,spread:0.02,bullets:1,speed:22,pierce:true,auto:false,ammo:96,color:'#88ff88'},
-  lmg:{name:'MG42',damage:35,fireRate:70,magSize:75,reloadTime:4000,spread:0.1,bullets:1,speed:19,pierce:false,auto:true,ammo:375,color:'#ff66ff'}
+  pistol:{name:'M1911',dmg:35,rate:300,mag:8,rtime:1500,auto:false,spread:0.02,reserve:Infinity,color:'#fc0',shootSfx:sfxShoot},
+  smg:{name:'MP40',dmg:28,rate:100,mag:32,rtime:2200,auto:true,spread:0.05,reserve:192,color:'#6cf',shootSfx:sfxShoot},
+  shotgun:{name:'Trench Gun',dmg:120,rate:700,mag:6,rtime:2600,auto:false,spread:0.12,pellets:5,reserve:60,color:'#f84',shootSfx:sfxShotgun},
+  rifle:{name:'M1 Garand',dmg:150,rate:450,mag:8,rtime:1800,auto:false,spread:0.01,reserve:80,color:'#8f8',shootSfx:sfxShoot},
 };
 
-// --- Map Layout ---
-const MAP_W=2400,MAP_H=2000;
-const WALLS=[];
-const TILE=80;
+// Wall buy locations {mapX, mapY, weapon, cost}
+const WALLBUYS=[
+  {mx:1,my:3,weapon:'smg',cost:1000},
+  {mx:14,my:3,weapon:'shotgun',cost:1500},
+  {mx:1,my:12,weapon:'rifle',cost:2000},
+];
 
-function buildMap(){
-  WALLS.length=0;
-  // Outer walls
-  WALLS.push({x:0,y:0,w:MAP_W,h:20});
-  WALLS.push({x:0,y:MAP_H-20,w:MAP_W,h:20});
-  WALLS.push({x:0,y:0,w:20,h:MAP_H});
-  WALLS.push({x:MAP_W-20,y:0,w:20,h:MAP_H});
-  // Inner structures — rooms and corridors
-  // Central bunker
-  WALLS.push({x:900,y:700,w:600,h:20});
-  WALLS.push({x:900,y:700,w:20,h:300});
-  WALLS.push({x:900,y:980,w:250,h:20});
-  WALLS.push({x:1250,y:980,w:250,h:20});
-  WALLS.push({x:1480,y:700,w:20,h:300});
-  // Left wing
-  WALLS.push({x:200,y:400,w:400,h:20});
-  WALLS.push({x:200,y:400,w:20,h:400});
-  WALLS.push({x:200,y:780,w:200,h:20});
-  WALLS.push({x:500,y:500,w:20,h:300});
-  // Right wing
-  WALLS.push({x:1800,y:400,w:400,h:20});
-  WALLS.push({x:2180,y:400,w:20,h:400});
-  WALLS.push({x:2000,y:780,w:200,h:20});
-  WALLS.push({x:1800,y:500,w:20,h:300});
-  // Top corridor
-  WALLS.push({x:700,y:200,w:20,h:300});
-  WALLS.push({x:1680,y:200,w:20,h:300});
-  // Bottom area
-  WALLS.push({x:400,y:1300,w:500,h:20});
-  WALLS.push({x:400,y:1300,w:20,h:300});
-  WALLS.push({x:400,y:1580,w:500,h:20});
-  WALLS.push({x:1500,y:1300,w:500,h:20});
-  WALLS.push({x:1980,y:1300,w:20,h:300});
-  WALLS.push({x:1500,y:1580,w:500,h:20});
-  // Small cover spots
-  WALLS.push({x:1100,y:1400,w:200,h:20});
-  WALLS.push({x:1100,y:1400,w:20,h:150});
-  WALLS.push({x:600,y:1000,w:150,h:20});
-  WALLS.push({x:1700,y:1000,w:150,h:20});
+// ── Spawn points (edges of map) ──
+const SPAWNS=[
+  {x:1.5,y:1.5},{x:14.5,y:1.5},{x:1.5,y:14.5},{x:14.5,y:14.5},
+  {x:7.5,y:1.5},{x:8.5,y:1.5},{x:7.5,y:14.5},{x:8.5,y:14.5},
+  {x:1.5,y:7.5},{x:14.5,y:7.5},
+];
 
-  // Wall buys
-  wallBuys=[
-    {x:530,y:410,weapon:'smg',cost:1000,label:'MP40 [1000]'},
-    {x:1790,y:410,weapon:'shotgun',cost:1500,label:'Trench Gun [1500]'},
-    {x:910,y:990,weapon:'rifle',cost:2000,label:'M1 Garand [2000]'},
-    {x:1500,y:1310,weapon:'lmg',cost:3000,label:'MG42 [3000]'},
-  ];
-  // Barriers (doors you can buy open)
-  barriers=[
-    {x:1150,y:980,w:100,h:20,cost:750,open:false,label:'Door [750]'},
-    {x:580,y:700,w:20,h:100,cost:750,open:false,label:'Door [750]'},
-    {x:1680,y:500,w:20,h:100,cost:1000,open:false,label:'Door [1000]'},
-    {x:900,y:1100,w:100,h:20,cost:1250,open:false,label:'Door [1250]'},
-  ];
+
+// ── Game State ──
+let state='menu'; // menu, playing, roundStart, gameover
+let player,zombies,particles,floats;
+let round,points,kills,totalKills;
+let zToSpawn,zSpawned,maxAlive,spawnCD;
+let roundTimer,dmgFlash;
+let keys={},mouseBtn=false,prevMouse=false,locked=false;
+let zBuf=new Float64Array(W); // z-buffer for sprite clipping
+let lastT=0,dt=0;
+let gunBob=0,gunKick=0,gunReloadAnim=0;
+
+function initGame(){
+  player={x:8,y:8,a:0,pitch:0,hp:150,maxHp:150,
+    wpn:'pistol',mag:8,reserve:Infinity,
+    reloading:false,rTimer:0,fTimer:0,
+    inv:0,weapons:['pistol'],bobT:0,moving:false};
+  zombies=[];particles=[];floats=[];
+  round=0;points=500;kills=0;totalKills=0;
+  zToSpawn=0;zSpawned=0;maxAlive=0;spawnCD=0;
+  roundTimer=0;dmgFlash=0;
+  gunBob=0;gunKick=0;gunReloadAnim=0;
+  nextRound();
 }
 
-// Spawn points (edges of map)
-function getSpawnPoint(){
-  const side=Math.floor(Math.random()*4);
-  switch(side){
-    case 0:return{x:Math.random()*MAP_W,y:30};
-    case 1:return{x:Math.random()*MAP_W,y:MAP_H-30};
-    case 2:return{x:30,y:Math.random()*MAP_H};
-    case 3:return{x:MAP_W-30,y:Math.random()*MAP_H};
+function nextRound(){
+  round++;
+  zToSpawn=Math.floor(6+round*3+Math.pow(round,1.2));
+  zSpawned=0;
+  maxAlive=Math.min(8+round*2,24);
+  spawnCD=0;
+  state='roundStart';
+  roundTimer=3;
+  sfxRound();
+}
+
+// ── Zombie creation ──
+function spawnZombie(){
+  // pick spawn far from player
+  let best=null,bestD=0;
+  for(let i=0;i<SPAWNS.length;i++){
+    const s=SPAWNS[i];
+    if(MAP[s.y|0][s.x|0]!==0)continue;
+    const d=Math.hypot(s.x-player.x,s.y-player.y);
+    if(d>bestD){bestD=d;best=s;}
+  }
+  if(!best)best=SPAWNS[0];
+  const hp=60+round*20+Math.random()*round*10;
+  const spd=0.9+Math.min(round*0.06,1.5)+Math.random()*0.2;
+  const dmg=15+round*3;
+  const type=round>=5&&Math.random()<0.2?'runner':round>=8&&Math.random()<0.1?'brute':'normal';
+  const z={x:best.x+(Math.random()-0.5)*0.6,y:best.y+(Math.random()-0.5)*0.6,
+    hp:hp,maxHp:hp,spd:spd,dmg:dmg,type:type,
+    atkCD:0,flash:0,dist:0,angle:0,hitAnim:0};
+  if(type==='runner'){z.spd*=1.5;z.hp*=0.5;z.dmg*=0.6;}
+  if(type==='brute'){z.spd*=0.5;z.hp*=3;z.dmg*=2;}
+  zombies.push(z);
+  zSpawned++;
+}
+
+// ── Raycasting ──
+const FOV=Math.PI/3; // 60 degrees
+const HALF_FOV=FOV/2;
+const NUM_RAYS=W;
+const RAY_STEP=FOV/NUM_RAYS;
+
+function castRays(){
+  for(let i=0;i<NUM_RAYS;i++){
+    const rayA=player.a-HALF_FOV+i*RAY_STEP;
+    const sin=Math.sin(rayA),cos=Math.cos(rayA);
+    let dist=0;
+    const step=0.02;
+    let hitType=0;
+    let mapX,mapY;
+    let hitSide=0; // 0=x face, 1=y face
+    
+    // DDA raycasting
+    const dx=cos,dy=sin;
+    const ddx=Math.abs(1/dx),ddy=Math.abs(1/dy);
+    mapX=Math.floor(player.x);mapY=Math.floor(player.y);
+    const stepX=dx>0?1:-1,stepY=dy>0?1:-1;
+    let sideDistX=dx>0?(mapX+1-player.x)*ddx:(player.x-mapX)*ddx;
+    let sideDistY=dy>0?(mapY+1-player.y)*ddy:(player.y-mapY)*ddy;
+    
+    let hit=false;
+    for(let s=0;s<64;s++){
+      if(sideDistX<sideDistY){
+        sideDistX+=ddx;mapX+=stepX;hitSide=0;
+      }else{
+        sideDistY+=ddy;mapY+=stepY;hitSide=1;
+      }
+      if(mapX<0||mapX>=MS||mapY<0||mapY>=MS){hit=true;hitType=1;break;}
+      if(MAP[mapY][mapX]>0){hit=true;hitType=MAP[mapY][mapX];break;}
+    }
+    
+    if(hit){
+      if(hitSide===0)dist=(mapX-player.x+(1-stepX)/2)/dx;
+      else dist=(mapY-player.y+(1-stepY)/2)/dy;
+    }else{dist=30;}
+    
+    // Fix fisheye
+    const perpDist=dist*Math.cos(rayA-player.a);
+    zBuf[i]=perpDist;
+    
+    // Wall height
+    const wallH=Math.min(H*2,(H/perpDist)|0);
+    const drawStart=((H-wallH)/2)|0;
+    const drawEnd=drawStart+wallH;
+    
+    // Texture coordinate
+    let wallX;
+    if(hitSide===0)wallX=player.y+dist*sin;
+    else wallX=player.x+dist*cos;
+    wallX-=Math.floor(wallX);
+    const texX=(wallX*TEX_SIZE)|0;
+    
+    // Draw ceiling
+    const ceilGrad=Math.max(0,1-drawStart/H);
+    X.fillStyle=`rgb(${(12*ceilGrad)|0},${(12*ceilGrad)|0},${(18*ceilGrad)|0})`;
+    X.fillRect(i,0,1,drawStart);
+    
+    // Draw wall column with texture
+    if(hitType>0&&hitType<=4&&TEXTURES[hitType]){
+      const tex=TEXTURES[hitType];
+      const shade=hitSide===1?0.65:1;
+      const fogF=Math.max(0,1-perpDist/12);
+      for(let y=drawStart;y<drawEnd&&y<H;y++){
+        if(y<0)continue;
+        const texY=(((y-drawStart)/wallH*TEX_SIZE)|0)%TEX_SIZE;
+        const ti=(texY*TEX_SIZE+texX)*3;
+        const r=(tex[ti]*shade*fogF)|0;
+        const g=(tex[ti+1]*shade*fogF)|0;
+        const b=(tex[ti+2]*shade*fogF)|0;
+        X.fillStyle=`rgb(${r},${g},${b})`;
+        X.fillRect(i,y,1,1);
+      }
+    }else{
+      const shade=hitSide===1?0.65:1;
+      const fog=Math.max(0,1-perpDist/12);
+      const base=80*shade*fog;
+      X.fillStyle=`rgb(${base|0},${base|0},${base|0})`;
+      X.fillRect(i,Math.max(0,drawStart),1,wallH);
+    }
+    
+    // Draw floor
+    X.fillStyle='#0a0a08';
+    X.fillRect(i,Math.min(H,drawEnd),1,H-drawEnd);
   }
 }
 
 
-// --- Init Game ---
-function initGame(){
-  buildMap();
-  player={
-    x:MAP_W/2,y:MAP_H/2,
-    angle:0,radius:16,speed:3.2,
-    health:100,maxHealth:100,
-    weapon:'pistol',
-    mag:WEAPONS.pistol.magSize,
-    reserve:Infinity,
-    reloading:false,reloadTimer:0,
-    fireTimer:0,
-    invincible:0,
-    weapons:['pistol']
-  };
-  zombies=[];bullets=[];particles=[];floatingTexts=[];
-  round=0;points=500;kills=0;
-  zombiesRemaining=0;zombiesSpawned=0;maxZombiesAlive=0;spawnTimer=0;
-  roundAnnounceTimer=0;gameOverTimer=0;
-  barriers.forEach(b=>b.open=false);
-  camera.shake=0;
-  startRound();
+// ── Sprite rendering (zombies) ──
+function renderSprites(){
+  // Sort by distance (far to near)
+  for(const z of zombies){
+    z.dist=Math.hypot(z.x-player.x,z.y-player.y);
+    z.angle=Math.atan2(z.y-player.y,z.x-player.x);
+  }
+  const sorted=[...zombies].sort((a,b)=>b.dist-a.dist);
+  
+  for(const z of sorted){
+    // Angle relative to player view
+    let relA=z.angle-player.a;
+    while(relA>Math.PI)relA-=2*Math.PI;
+    while(relA<-Math.PI)relA+=2*Math.PI;
+    
+    // Check if in view
+    if(Math.abs(relA)>HALF_FOV+0.3)continue;
+    
+    // Screen position
+    const screenX=((relA/FOV+0.5)*W)|0;
+    const spriteH=Math.min(H*1.8,(H*0.85/z.dist)|0);
+    const spriteW=(spriteH*0.6)|0;
+    const drawY=((H-spriteH)/2)|0;
+    const startX=screenX-spriteW/2;
+    
+    // Draw sprite columns with z-buffer check
+    const bodyCol=z.type==='brute'?[80,50,30]:z.type==='runner'?[40,90,40]:[50,80,50];
+    const flashMul=z.flash>0?2:1;
+    const fogF=Math.max(0.05,1-z.dist/10);
+    const hitOff=z.hitAnim>0?Math.sin(z.hitAnim*20)*2:0;
+    
+    for(let sx=Math.max(0,startX|0);sx<Math.min(W,(startX+spriteW)|0);sx++){
+      if(z.dist>zBuf[sx])continue; // behind wall
+      
+      const localX=(sx-startX)/spriteW; // 0-1 across sprite
+      
+      // Simple humanoid shape
+      const headTop=0.05;
+      const headBot=0.22;
+      const bodyTop=0.22;
+      const bodyBot=0.65;
+      const legTop=0.65;
+      const legBot=1.0;
+      const headW=0.15;
+      const bodyW=0.25;
+      const legW=0.1;
+      const armW=0.08;
+      
+      const cx=0.5; // center x
+      
+      for(let sy=Math.max(0,drawY);sy<Math.min(H,drawY+spriteH);sy++){
+        const localY=(sy-drawY)/spriteH;
+        let draw=false;
+        let r=0,g=0,b=0;
+        
+        // Head
+        if(localY>=headTop&&localY<headBot&&Math.abs(localX-cx)<headW){
+          draw=true;r=70*flashMul;g=85*flashMul;b=60*flashMul;
+          // Eyes
+          if(localY>0.1&&localY<0.16){
+            if(Math.abs(localX-0.43)<0.03||Math.abs(localX-0.57)<0.03){
+              r=220;g=40;b=20;
+            }
+          }
+        }
+        // Body
+        if(localY>=bodyTop&&localY<bodyBot&&Math.abs(localX-cx)<bodyW){
+          draw=true;r=bodyCol[0]*flashMul;g=bodyCol[1]*flashMul;b=bodyCol[2]*flashMul;
+        }
+        // Arms (reaching forward)
+        if(localY>=0.25&&localY<0.5){
+          if((localX>cx+bodyW&&localX<cx+bodyW+armW+0.05)||(localX<cx-bodyW&&localX>cx-bodyW-armW-0.05)){
+            draw=true;r=60*flashMul;g=75*flashMul;b=50*flashMul;
+          }
+        }
+        // Legs
+        if(localY>=legTop&&localY<legBot){
+          const legOff=0.08;
+          if(Math.abs(localX-(cx-legOff))<legW||Math.abs(localX-(cx+legOff))<legW){
+            draw=true;r=40*flashMul;g=45*flashMul;b=35*flashMul;
+          }
+        }
+        
+        if(draw){
+          r=Math.min(255,(r*fogF)|0);
+          g=Math.min(255,(g*fogF)|0);
+          b=Math.min(255,(b*fogF)|0);
+          X.fillStyle=`rgb(${r},${g},${b})`;
+          X.fillRect(sx,sy+hitOff,1,1);
+        }
+      }
+    }
+    
+    // Health bar above zombie
+    if(z.hp<z.maxHp&&z.dist<8){
+      const barW=spriteW*0.8;
+      const barH=3;
+      const barX=screenX-barW/2;
+      const barY=drawY-8;
+      if(barY>0){
+        X.fillStyle='rgba(0,0,0,0.6)';
+        X.fillRect(barX,barY,barW,barH);
+        X.fillStyle=z.type==='brute'?'#f84':'#f44';
+        X.fillRect(barX,barY,barW*(z.hp/z.maxHp),barH);
+      }
+    }
+  }
 }
 
-function startRound(){
-  round++;
-  zombiesRemaining=Math.floor(4+round*2.5+Math.pow(round,1.15));
-  zombiesSpawned=0;
-  maxZombiesAlive=Math.min(Math.floor(6+round*1.5),30);
-  spawnTimer=0;
-  state=STATE.ROUND_TRANSITION;
-  roundAnnounceTimer=2.5;
-  sfxRound();
-  document.getElementById('round-val').textContent=round;
-  const el=document.getElementById('round-announce');
-  el.textContent='ROUND '+round;
-  el.style.opacity='1';
-  el.style.transform='translate(-50%,-50%) scale(1.2)';
-  setTimeout(()=>{el.style.transition='opacity 1s, transform 1s';el.style.opacity='0';el.style.transform='translate(-50%,-50%) scale(0.8)';},1800);
-  setTimeout(()=>{el.style.transition='none';},3000);
+// ── Draw weapon ──
+function drawGun(){
+  const w=WEAPONS[player.wpn];
+  const bobX=Math.sin(gunBob)*8;
+  const bobY=Math.abs(Math.cos(gunBob))*5;
+  const kickY=gunKick*30;
+  const reloadY=gunReloadAnim>0?Math.sin(gunReloadAnim*Math.PI)*80:0;
+  
+  const gx=W/2+bobX-40;
+  const gy=H-120+bobY+kickY+reloadY;
+  
+  // Gun body
+  X.fillStyle='#444';
+  X.fillRect(gx+25,gy+10,30,60); // grip
+  X.fillStyle='#555';
+  X.fillRect(gx+10,gy,60,20);    // body
+  X.fillStyle='#666';
+  X.fillRect(gx+55,gy-10,8,20);  // barrel
+  
+  // Muzzle flash when shooting
+  if(gunKick>0.3){
+    X.fillStyle='rgba(255,200,50,0.8)';
+    X.beginPath();
+    X.arc(gx+63,gy-5,12*gunKick,0,Math.PI*2);
+    X.fill();
+    X.fillStyle='rgba(255,255,200,0.6)';
+    X.beginPath();
+    X.arc(gx+63,gy-5,6*gunKick,0,Math.PI*2);
+    X.fill();
+  }
+  
+  // Weapon name & ammo
+  X.fillStyle='rgba(0,0,0,0.5)';
+  X.fillRect(W-160,H-50,155,45);
+  X.fillStyle=w.color;
+  X.font='bold 11px Courier New';
+  X.textAlign='right';
+  X.fillText(w.name,W-12,H-32);
+  X.fillStyle=player.reloading?'#f84':'#fff';
+  X.font='bold 16px Courier New';
+  const ammoTxt=player.reloading?'RELOADING':player.mag+' / '+(player.reserve===Infinity?'∞':player.reserve);
+  X.fillText(ammoTxt,W-12,H-12);
+  
+  // Reload progress bar
+  if(player.reloading){
+    const pct=1-player.rTimer/(WEAPONS[player.wpn].rtime/1000);
+    X.fillStyle='rgba(255,255,255,0.1)';
+    X.fillRect(W/2-60,H/2+30,120,6);
+    X.fillStyle='#fc0';
+    X.fillRect(W/2-60,H/2+30,120*pct,6);
+  }
 }
 
-// --- Player Functions ---
-function switchWeapon(){
-  if(player.weapons.length<2)return;
-  const idx=player.weapons.indexOf(player.weapon);
-  const next=player.weapons[(idx+1)%player.weapons.length];
-  player.weapon=next;
-  const w=WEAPONS[next];
-  player.mag=w.magSize;
-  player.reserve=next==='pistol'?Infinity:w.ammo;
-  player.reloading=false;
-  player.reloadTimer=0;
-  updateWeaponHUD();
+// ── Draw HUD ──
+function drawHUD(){
+  // Points
+  X.fillStyle='rgba(0,0,0,0.5)';
+  X.fillRect(5,H-50,130,45);
+  X.fillStyle='#fc0';
+  X.font='bold 10px Courier New';
+  X.textAlign='left';
+  X.fillText('POINTS',12,H-34);
+  X.font='bold 20px Courier New';
+  X.fillText(points,12,H-12);
+  
+  // Round
+  X.fillStyle='rgba(0,0,0,0.5)';
+  X.fillRect(W/2-45,5,90,30);
+  X.fillStyle='#c00';
+  X.font='bold 10px Courier New';
+  X.textAlign='center';
+  X.fillText('ROUND',W/2,18);
+  X.font='bold 14px Courier New';
+  X.fillText(round,W/2,32);
+  
+  // Health bar
+  const hpW=160,hpH=8;
+  const hpX=W/2-hpW/2,hpY=H-20;
+  X.fillStyle='rgba(0,0,0,0.5)';
+  X.fillRect(hpX-2,hpY-2,hpW+4,hpH+4);
+  const hpPct=Math.max(0,player.hp/player.maxHp);
+  X.fillStyle=hpPct<0.3?'#f00':'#c00';
+  X.fillRect(hpX,hpY,hpW*hpPct,hpH);
+  
+  // Kill count
+  X.fillStyle='#888';
+  X.font='10px Courier New';
+  X.textAlign='center';
+  X.fillText('KILLS: '+totalKills,W/2,H-26);
+  
+  // Round announcement
+  if(state==='roundStart'){
+    const a=Math.min(1,roundTimer/2);
+    X.fillStyle=`rgba(200,0,0,${a})`;
+    X.font='bold 36px Courier New';
+    X.textAlign='center';
+    X.fillText('ROUND '+round,W/2,H/2-20);
+    X.fillStyle=`rgba(150,150,150,${a*0.7})`;
+    X.font='14px Courier New';
+    X.fillText(zToSpawn+' zombies incoming',W/2,H/2+15);
+  }
+  
+  // Buy prompt
+  const buyInfo=getNearbyBuy();
+  if(buyInfo&&state==='playing'){
+    X.fillStyle='rgba(0,0,0,0.6)';
+    X.fillRect(W/2-120,H/2+45,240,24);
+    X.fillStyle='#fc0';
+    X.font='12px Courier New';
+    X.textAlign='center';
+    X.fillText('[E] Buy '+WEAPONS[buyInfo.weapon].name+' - $'+buyInfo.cost,W/2,H/2+61);
+  }
+  
+  // Damage overlay
+  if(dmgFlash>0){
+    X.fillStyle=`rgba(150,0,0,${dmgFlash*0.3})`;
+    X.fillRect(0,0,W,H);
+  }
+  
+  // Game over
+  if(state==='gameover'){
+    X.fillStyle='rgba(0,0,0,0.75)';
+    X.fillRect(0,0,W,H);
+    X.fillStyle='#c00';
+    X.font='bold 42px Courier New';
+    X.textAlign='center';
+    X.fillText('YOU DIED',W/2,H/2-40);
+    X.fillStyle='#888';
+    X.font='14px Courier New';
+    X.fillText('Round '+round+' · '+totalKills+' kills · '+points+' points',W/2,H/2);
+    X.fillStyle='#aaa';
+    X.font='12px Courier New';
+    X.fillText('Click to try again',W/2,H/2+30);
+  }
 }
 
-function updateWeaponHUD(){
-  const w=WEAPONS[player.weapon];
-  document.getElementById('weapon-name').textContent=w.name;
-  document.getElementById('ammo-val').textContent=player.mag+' / '+(player.reserve===Infinity?'∞':player.reserve);
+function getNearbyBuy(){
+  for(const wb of WALLBUYS){
+    const d=Math.hypot((wb.mx+0.5)-player.x,(wb.my+0.5)-player.y);
+    if(d<1.8)return wb;
+  }
+  return null;
 }
 
-function startReload(){
+
+// ── Update ──
+function update(){
+  if(state==='roundStart'){
+    roundTimer-=dt;
+    if(roundTimer<=0)state='playing';
+    updatePlayerMove();
+    return;
+  }
+  if(state==='gameover')return;
+  if(state!=='playing')return;
+  
+  updatePlayerMove();
+  
+  // Fire timer
+  player.fTimer=Math.max(0,player.fTimer-dt);
+  player.inv=Math.max(0,player.inv-dt);
+  dmgFlash=Math.max(0,dmgFlash-dt*3);
+  gunKick=Math.max(0,gunKick-dt*5);
+  gunReloadAnim=Math.max(0,gunReloadAnim-dt*1.5);
+  
+  // Reloading
+  if(player.reloading){
+    player.rTimer-=dt;
+    if(player.rTimer<=0)finishReload();
+  }
+  
+  // Shooting
+  const w=WEAPONS[player.wpn];
+  if(mouseBtn&&state==='playing'){
+    if(w.auto){tryShoot();}
+    else if(!prevMouse){tryShoot();}
+  }
+  prevMouse=mouseBtn;
+  
+  // Spawn zombies
+  if(zSpawned<zToSpawn){
+    spawnCD-=dt;
+    if(spawnCD<=0&&zombies.length<maxAlive){
+      spawnZombie();
+      spawnCD=Math.max(0.5,3-round*0.15);
+    }
+  }
+  
+  // Update zombies
+  for(let i=zombies.length-1;i>=0;i--){
+    const z=zombies[i];
+    z.flash=Math.max(0,z.flash-dt*5);
+    z.hitAnim=Math.max(0,z.hitAnim-dt*4);
+    
+    // Move toward player
+    const dx=player.x-z.x,dy=player.y-z.y;
+    const d=Math.hypot(dx,dy);
+    z.dist=d;
+    
+    if(d>0.5){
+      let mx=dx/d*z.spd*dt;
+      let my=dy/d*z.spd*dt;
+      
+      // Separation from other zombies
+      for(const oz of zombies){
+        if(oz===z)continue;
+        const sx=z.x-oz.x,sy=z.y-oz.y;
+        const sd=Math.hypot(sx,sy);
+        if(sd<0.8&&sd>0.01){
+          mx+=sx/sd*0.5*dt;
+          my+=sy/sd*0.5*dt;
+        }
+      }
+      
+      // Wall collision check
+      const nx=z.x+mx,ny=z.y+my;
+      if(MAP[Math.floor(z.y)][Math.floor(nx)]===0)z.x=nx;
+      if(MAP[Math.floor(ny)][Math.floor(z.x)]===0)z.y=ny;
+    }
+    
+    // Attack player
+    if(d<0.7){
+      z.atkCD-=dt;
+      if(z.atkCD<=0){
+        if(player.inv<=0){
+          player.hp-=z.dmg;
+          sfxHurt();
+          dmgFlash=1;
+          document.getElementById('dmg').style.opacity='0.5';
+          setTimeout(()=>document.getElementById('dmg').style.opacity='0',120);
+          if(player.hp<=0){
+            player.hp=0;
+            state='gameover';
+            document.exitPointerLock&&document.exitPointerLock();
+            setTimeout(()=>{
+              C.addEventListener('click',restartOnce);
+            },1000);
+          }
+        }
+        z.atkCD=1;
+      }
+    }
+  }
+  
+  // Particles
+  for(let i=particles.length-1;i>=0;i--){
+    const p=particles[i];
+    p.life-=dt;
+    p.x+=p.vx*dt;p.y+=p.vy*dt;
+    if(p.life<=0)particles.splice(i,1);
+  }
+  
+  // Floating text
+  for(let i=floats.length-1;i>=0;i--){
+    floats[i].life-=dt;
+    floats[i].offy-=40*dt;
+    if(floats[i].life<=0)floats.splice(i,1);
+  }
+  
+  // Check round complete
+  if(zSpawned>=zToSpawn&&zombies.length===0){
+    points+=round*100;
+    floats.push({text:'+'+round*100+' ROUND BONUS',x:W/2,offy:0,life:2,maxLife:2,color:'#fc0'});
+    nextRound();
+  }
+}
+
+function restartOnce(){
+  C.removeEventListener('click',restartOnce);
+  showGameOver();
+}
+
+function showGameOver(){
+  const ov=document.getElementById('overlay');
+  ov.classList.remove('hidden');
+  ov.innerHTML=`<h1 style="color:#c00">YOU DIED</h1>
+    <div class="sub">THE HORDE OVERWHELMED YOU</div>
+    <div class="stats">Survived to <span>Round ${round}</span><br><span>${totalKills}</span> zombies killed<br><span>${points}</span> points</div>
+    <button class="btn" onclick="startGame()" style="margin-top:24px">FIGHT AGAIN</button>`;
+}
+
+function updatePlayerMove(){
+  let mx=0,my=0;
+  if(keys['w']||keys['arrowup'])  {mx+=Math.cos(player.a);my+=Math.sin(player.a);}
+  if(keys['s']||keys['arrowdown']){mx-=Math.cos(player.a);my-=Math.sin(player.a);}
+  if(keys['a']||keys['arrowleft']){mx+=Math.cos(player.a-Math.PI/2);my+=Math.sin(player.a-Math.PI/2);}
+  if(keys['d']||keys['arrowright']){mx-=Math.cos(player.a-Math.PI/2);my-=Math.sin(player.a-Math.PI/2);}
+  
+  const ml=Math.hypot(mx,my);
+  player.moving=ml>0;
+  if(ml>0){
+    mx/=ml;my/=ml;
+    const spd=3*dt;
+    const nx=player.x+mx*spd;
+    const ny=player.y+my*spd;
+    // Wall collision (with margin)
+    const m=0.25;
+    if(MAP[Math.floor(player.y)][Math.floor(nx+m*Math.sign(mx))]===0)player.x=nx;
+    if(MAP[Math.floor(ny+m*Math.sign(my))][Math.floor(player.x)]===0)player.y=ny;
+    player.bobT+=dt*8;
+    gunBob=player.bobT;
+  }
+}
+
+// ── Shooting ──
+function tryShoot(){
   if(player.reloading)return;
-  const w=WEAPONS[player.weapon];
-  const maxReserve=player.weapon==='pistol'?Infinity:w.ammo;
-  if(player.mag>=w.magSize)return;
+  if(player.fTimer>0)return;
+  const w=WEAPONS[player.wpn];
+  if(player.mag<=0){sfxEmpty();doReload();return;}
+  
+  player.mag--;
+  player.fTimer=w.rate/1000;
+  w.shootSfx();
+  gunKick=1;
+  
+  const pellets=w.pellets||1;
+  for(let p=0;p<pellets;p++){
+    const spread=(Math.random()-0.5)*w.spread*2;
+    const rayA=player.a+spread;
+    const sin=Math.sin(rayA),cos=Math.cos(rayA);
+    
+    // Hitscan - check zombies
+    let bestHit=null,bestDist=Infinity;
+    for(const z of zombies){
+      const dx=z.x-player.x,dy=z.y-player.y;
+      const dot=dx*cos+dy*sin;
+      if(dot<0.2)continue; // behind player
+      const perpX=dx-dot*cos,perpY=dy-dot*sin;
+      const perpD=Math.hypot(perpX,perpY);
+      const hitR=0.35+(z.type==='brute'?0.15:0);
+      if(perpD<hitR&&dot<bestDist){
+        // Check wall occlusion
+        let blocked=false;
+        const step=0.1;
+        for(let t=0;t<dot;t+=step){
+          const cx=player.x+cos*t,cy=player.y+sin*t;
+          if(MAP[Math.floor(cy)][Math.floor(cx)]>0){blocked=true;break;}
+        }
+        if(!blocked){bestDist=dot;bestHit=z;}
+      }
+    }
+    
+    if(bestHit){
+      bestHit.hp-=w.dmg;
+      bestHit.flash=1;
+      bestHit.hitAnim=1;
+      sfxHit();
+      points+=10;
+      if(bestHit.hp<=0){
+        const idx=zombies.indexOf(bestHit);
+        if(idx>=0){
+          kills++;totalKills++;
+          const pts=bestHit.type==='brute'?200:bestHit.type==='runner'?80:60;
+          points+=pts;
+          sfxKill();
+          floats.push({text:'+'+pts,x:W/2+(Math.random()-0.5)*100,offy:0,life:1,maxLife:1,color:'#fc0'});
+          zombies.splice(idx,1);
+        }
+      }
+    }
+  }
+  
+  if(player.mag<=0)doReload();
+}
+
+function doReload(){
+  if(player.reloading)return;
+  const w=WEAPONS[player.wpn];
+  if(player.mag>=w.mag)return;
   if(player.reserve<=0&&player.reserve!==Infinity)return;
   player.reloading=true;
-  player.reloadTimer=w.reloadTime/1000;
+  player.rTimer=w.rtime/1000;
+  gunReloadAnim=1;
   sfxReload();
 }
 
 function finishReload(){
-  const w=WEAPONS[player.weapon];
-  const need=w.magSize-player.mag;
-  if(player.reserve===Infinity){
-    player.mag=w.magSize;
-  }else{
-    const take=Math.min(need,player.reserve);
-    player.mag+=take;
-    player.reserve-=take;
-  }
+  const w=WEAPONS[player.wpn];
+  const need=w.mag-player.mag;
+  if(player.reserve===Infinity){player.mag=w.mag;}
+  else{const take=Math.min(need,player.reserve);player.mag+=take;player.reserve-=take;}
   player.reloading=false;
-  player.reloadTimer=0;
-  updateWeaponHUD();
-}
-
-function shoot(){
-  if(player.reloading)return;
-  if(player.fireTimer>0)return;
-  const w=WEAPONS[player.weapon];
-  if(player.mag<=0){sfxEmpty();startReload();return;}
-  player.mag--;
-  player.fireTimer=w.fireRate/1000;
-  if(w.name==='Trench Gun')sfxShotgun();else sfxShoot();
-  camera.shake=Math.min(camera.shake+3,8);
-  // Muzzle flash particle
-  const mx=player.x+Math.cos(player.angle)*24;
-  const my=player.y+Math.sin(player.angle)*24;
-  for(let i=0;i<4;i++){
-    particles.push({x:mx,y:my,vx:Math.cos(player.angle)*3+rng(-1,1),vy:Math.sin(player.angle)*3+rng(-1,1),life:0.15,maxLife:0.15,size:rng(2,5),color:'#ffcc44',type:'spark'});
-  }
-  for(let b=0;b<w.bullets;b++){
-    const spread=(Math.random()-0.5)*w.spread*2;
-    const angle=player.angle+spread;
-    bullets.push({x:mx,y:my,vx:Math.cos(angle)*w.speed,vy:Math.sin(angle)*w.speed,damage:w.damage,pierce:w.pierce,life:1.5,color:w.color,radius:w.bullets>1?2:3});
-  }
-  updateWeaponHUD();
-  if(player.mag<=0)startReload();
-}
-
-function rng(a,b){return a+Math.random()*(b-a);}
-
-// --- Zombie ---
-function spawnZombie(){
-  const p=getSpawnPoint();
-  const hp=50+round*15+Math.random()*round*10;
-  const spd=0.8+Math.min(round*0.08,2)+Math.random()*0.3;
-  const dmg=10+Math.floor(round*2);
-  const sz=14+Math.random()*6;
-  const type=round>=5&&Math.random()<0.15?'runner':round>=8&&Math.random()<0.1?'brute':'normal';
-  let z={x:p.x,y:p.y,health:hp,maxHealth:hp,speed:spd,damage:dmg,radius:sz,angle:0,attackTimer:0,type:type,stun:0,flash:0};
-  if(type==='runner'){z.speed=spd*1.6;z.health=hp*0.6;z.radius=12;z.damage=dmg*0.7;}
-  if(type==='brute'){z.speed=spd*0.5;z.health=hp*3;z.radius=22;z.damage=dmg*2;}
-  zombies.push(z);
-  zombiesSpawned++;
-}
-
-// --- Collision helpers ---
-function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y);}
-function circleRect(cx,cy,cr,rx,ry,rw,rh){
-  const nx=Math.max(rx,Math.min(cx,rx+rw));
-  const ny=Math.max(ry,Math.min(cy,ry+rh));
-  return Math.hypot(cx-nx,cy-ny)<cr;
-}
-function resolveCircleRect(obj,r,rx,ry,rw,rh){
-  const nx=Math.max(rx,Math.min(obj.x,rx+rw));
-  const ny=Math.max(ry,Math.min(obj.y,ry+rh));
-  const dx=obj.x-nx,dy=obj.y-ny;
-  const d=Math.hypot(dx,dy);
-  if(d<r&&d>0){const push=(r-d)/d;obj.x+=dx*push;obj.y+=dy*push;}
-}
-function getAllWalls(){
-  const all=[...WALLS];
-  barriers.forEach(b=>{if(!b.open)all.push(b);});
-  return all;
+  player.rTimer=0;
+  gunReloadAnim=0;
 }
 
 
-// --- Update ---
-function update(){
-  if(state===STATE.ROUND_TRANSITION){
-    roundAnnounceTimer-=dt;
-    if(roundAnnounceTimer<=0){state=STATE.PLAYING;}
-    return;
-  }
-  if(state===STATE.GAME_OVER){
-    gameOverTimer-=dt;
-    return;
-  }
-  if(state!==STATE.PLAYING)return;
-
-  // Player movement
-  let mx=0,my=0;
-  if(keys['w']||keys['arrowup'])my=-1;
-  if(keys['s']||keys['arrowdown'])my=1;
-  if(keys['a']||keys['arrowleft'])mx=-1;
-  if(keys['d']||keys['arrowright'])mx=1;
-  if(mobileMove.active){mx=mobileMove.dx;my=mobileMove.dy;}
-  const ml=Math.hypot(mx,my);
-  if(ml>0){mx/=ml;my/=ml;}
-  player.x+=mx*player.speed;
-  player.y+=my*player.speed;
-
-  // Player-wall collision
-  const walls=getAllWalls();
-  walls.forEach(w=>resolveCircleRect(player,player.radius,w.x,w.y,w.w,w.h));
-  player.x=Math.max(player.radius+20,Math.min(MAP_W-player.radius-20,player.x));
-  player.y=Math.max(player.radius+20,Math.min(MAP_H-player.radius-20,player.y));
-
-  // Aim
-  if(mobileAim.active){
-    player.angle=Math.atan2(mobileAim.dy,mobileAim.dx);
+// ── Buy system ──
+function tryBuy(){
+  const wb=getNearbyBuy();
+  if(!wb)return;
+  const w=WEAPONS[wb.weapon];
+  if(player.weapons.includes(wb.weapon)){
+    // Buy ammo
+    if(points>=Math.floor(wb.cost/2)){
+      points-=Math.floor(wb.cost/2);
+      player.reserve=w.reserve;
+      sfxBuy();
+      floats.push({text:'MAX AMMO!',x:W/2,offy:0,life:1.5,maxLife:1.5,color:'#6f6'});
+    }
   }else{
-    const wx=mouseX-canvas.width/2+camera.x;
-    const wy=mouseY-canvas.height/2+camera.y;
-    player.angle=Math.atan2(wy-player.y,wx-player.x);
-  }
-
-  // Shooting
-  player.fireTimer=Math.max(0,player.fireTimer-dt);
-  player.invincible=Math.max(0,player.invincible-dt);
-  if(player.reloading){
-    player.reloadTimer-=dt;
-    if(player.reloadTimer<=0)finishReload();
-  }
-  const w=WEAPONS[player.weapon];
-  if(mouseDown||mobileShoot){
-    if(w.auto)shoot();
-    else if(!wasShooting)shoot();
-  }
-  wasShooting=mouseDown||mobileShoot;
-
-  // Spawn zombies
-  if(zombiesSpawned<zombiesRemaining){
-    spawnTimer-=dt;
-    if(spawnTimer<=0&&zombies.length<maxZombiesAlive){
-      spawnZombie();
-      spawnTimer=Math.max(0.3,2-round*0.1);
+    if(points>=wb.cost){
+      points-=wb.cost;
+      player.weapons.push(wb.weapon);
+      player.wpn=wb.weapon;
+      player.mag=w.mag;
+      player.reserve=w.reserve;
+      player.reloading=false;
+      sfxBuy();
+      floats.push({text:w.name+'!',x:W/2,offy:0,life:1.5,maxLife:1.5,color:'#6f6'});
     }
-  }
-
-  // Update zombies
-  for(let i=zombies.length-1;i>=0;i--){
-    const z=zombies[i];
-    z.flash=Math.max(0,z.flash-dt*6);
-    z.stun=Math.max(0,z.stun-dt);
-    if(z.stun>0)continue;
-
-    // Pathfinding: move toward player (simple steering with avoidance)
-    const dx=player.x-z.x,dy=player.y-z.y;
-    const dd=Math.hypot(dx,dy);
-    if(dd>0){
-      z.angle=Math.atan2(dy,dx);
-      // Separation from other zombies
-      let sepX=0,sepY=0;
-      for(let j=0;j<zombies.length;j++){
-        if(i===j)continue;
-        const oz=zombies[j];
-        const sx=z.x-oz.x,sy=z.y-oz.y;
-        const sd=Math.hypot(sx,sy);
-        const minD=z.radius+oz.radius+4;
-        if(sd<minD&&sd>0){
-          const f=(minD-sd)/sd*0.5;
-          sepX+=sx*f;sepY+=sy*f;
-        }
-      }
-      const moveX=dx/dd+sepX*0.3;
-      const moveY=dy/dd+sepY*0.3;
-      const ml2=Math.hypot(moveX,moveY);
-      if(ml2>0){
-        z.x+=moveX/ml2*z.speed;
-        z.y+=moveY/ml2*z.speed;
-      }
-    }
-
-    // Zombie-wall collision
-    walls.forEach(wl=>resolveCircleRect(z,z.radius,wl.x,wl.y,wl.w,wl.h));
-    z.x=Math.max(z.radius+20,Math.min(MAP_W-z.radius-20,z.x));
-    z.y=Math.max(z.radius+20,Math.min(MAP_H-z.radius-20,z.y));
-
-    // Attack player
-    if(dd<z.radius+player.radius+5){
-      z.attackTimer-=dt;
-      if(z.attackTimer<=0){
-        if(player.invincible<=0){
-          player.health-=z.damage;
-          sfxHurt();
-          camera.shake=Math.min(camera.shake+6,12);
-          document.getElementById('damage-overlay').style.opacity='0.6';
-          setTimeout(()=>document.getElementById('damage-overlay').style.opacity='0',150);
-          if(player.health<=0){
-            player.health=0;
-            state=STATE.GAME_OVER;
-            gameOverTimer=2;
-            showGameOver();
-          }
-        }
-        z.attackTimer=0.8;
-      }
-    }
-  }
-
-  // Update bullets
-  for(let i=bullets.length-1;i>=0;i--){
-    const b=bullets[i];
-    b.x+=b.vx;b.y+=b.vy;
-    b.life-=dt;
-    // Wall collision
-    let hitWall=false;
-    for(const wl of walls){
-      if(circleRect(b.x,b.y,b.radius,wl.x,wl.y,wl.w,wl.h)){hitWall=true;break;}
-    }
-    if(b.life<=0||hitWall||b.x<0||b.x>MAP_W||b.y<0||b.y>MAP_H){
-      if(hitWall){
-        for(let j=0;j<3;j++)particles.push({x:b.x,y:b.y,vx:rng(-2,2),vy:rng(-2,2),life:0.3,maxLife:0.3,size:rng(1,3),color:'#ffaa44',type:'spark'});
-      }
-      bullets.splice(i,1);continue;
-    }
-    // Hit zombie
-    for(let j=zombies.length-1;j>=0;j--){
-      const z=zombies[j];
-      if(dist(b,z)<b.radius+z.radius){
-        z.health-=b.damage;
-        z.flash=1;
-        z.stun=0.1;
-        sfxHit();
-        points+=10;
-        // Blood particles
-        for(let k=0;k<5;k++){
-          particles.push({x:z.x,y:z.y,vx:rng(-3,3),vy:rng(-3,3),life:0.5,maxLife:0.5,size:rng(2,5),color:'#cc2222',type:'blood'});
-        }
-        if(z.health<=0){
-          killZombie(j);
-        }
-        if(!b.pierce){bullets.splice(i,1);break;}
-        else b.damage*=0.7;
-      }
-    }
-  }
-
-  // Update particles
-  for(let i=particles.length-1;i>=0;i--){
-    const p=particles[i];
-    p.x+=p.vx;p.y+=p.vy;
-    p.vx*=0.95;p.vy*=0.95;
-    p.life-=dt;
-    if(p.life<=0)particles.splice(i,1);
-  }
-
-  // Update floating texts
-  for(let i=floatingTexts.length-1;i>=0;i--){
-    const ft=floatingTexts[i];
-    ft.y-=40*dt;
-    ft.life-=dt;
-    if(ft.life<=0)floatingTexts.splice(i,1);
-  }
-
-  // Check round complete
-  if(zombiesSpawned>=zombiesRemaining&&zombies.length===0){
-    // Bonus points
-    points+=round*100;
-    floatingTexts.push({x:player.x,y:player.y-40,text:'+'+round*100+' ROUND BONUS',life:2,maxLife:2,color:'#ffcc00',size:18});
-    startRound();
-  }
-
-  // Update HUD
-  document.getElementById('points-val').textContent=points;
-  const hpPct=Math.max(0,player.health/player.maxHealth*100);
-  document.getElementById('health-bar').style.width=hpPct+'%';
-  if(hpPct<30)document.getElementById('health-bar').style.background='linear-gradient(90deg,#ff0000,#ff2222)';
-  else document.getElementById('health-bar').style.background='linear-gradient(90deg,#ff2222,#ff4444)';
-  updateWeaponHUD();
-
-  // Camera
-  camera.x+=(player.x-camera.x)*0.1;
-  camera.y+=(player.y-camera.y)*0.1;
-  if(camera.shake>0.1){camera.shake*=camera.shakeDecay;}else{camera.shake=0;}
-
-  // Buy prompts
-  checkBuyPrompts();
-}
-
-let wasShooting=false;
-
-function killZombie(idx){
-  const z=zombies[idx];
-  kills++;
-  points+=z.type==='brute'?200:z.type==='runner'?80:60;
-  sfxKill();
-  floatingTexts.push({x:z.x,y:z.y-20,text:'+'+(z.type==='brute'?200:z.type==='runner'?80:60),life:1,maxLife:1,color:'#ffcc00',size:16});
-  // Death particles
-  const col=z.type==='brute'?'#884422':z.type==='runner'?'#44aa44':'#338833';
-  for(let i=0;i<12;i++){
-    particles.push({x:z.x,y:z.y,vx:rng(-4,4),vy:rng(-4,4),life:0.8,maxLife:0.8,size:rng(3,8),color:col,type:'blood'});
-  }
-  // Ground stain
-  particles.push({x:z.x,y:z.y,vx:0,vy:0,life:15,maxLife:15,size:z.radius*1.5,color:'rgba(40,15,15,0.5)',type:'stain'});
-  zombies.splice(idx,1);
-}
-
-// --- Buy System ---
-function checkBuyPrompts(){
-  const el=document.getElementById('buy-prompt');
-  let found=false;
-  // Wall buys
-  for(const wb of wallBuys){
-    if(dist(player,wb)<80){
-      el.textContent='[E] '+wb.label;
-      el.style.opacity='1';
-      found=true;
-      if(keys['e']&&!prevKeys['e']){
-        if(points>=wb.cost&&!player.weapons.includes(wb.weapon)){
-          points-=wb.cost;
-          player.weapons.push(wb.weapon);
-          player.weapon=wb.weapon;
-          const wpn=WEAPONS[wb.weapon];
-          player.mag=wpn.magSize;
-          player.reserve=wpn.ammo;
-          player.reloading=false;
-          sfxBuy();
-          floatingTexts.push({x:player.x,y:player.y-40,text:wpn.name+'!',life:1.5,maxLife:1.5,color:'#66ff66',size:20});
-          updateWeaponHUD();
-        }else if(player.weapons.includes(wb.weapon)){
-          // Buy ammo
-          if(points>=Math.floor(wb.cost/2)){
-            const wpn=WEAPONS[wb.weapon];
-            points-=Math.floor(wb.cost/2);
-            player.reserve=wpn.ammo;
-            sfxBuy();
-            floatingTexts.push({x:player.x,y:player.y-40,text:'Max Ammo!',life:1,maxLife:1,color:'#66ff66',size:16});
-          }
-        }
-      }
-      break;
-    }
-  }
-  // Barriers
-  for(const br of barriers){
-    if(br.open)continue;
-    const bx=br.x+br.w/2,by=br.y+br.h/2;
-    if(dist(player,{x:bx,y:by})<100){
-      el.textContent='[E] '+br.label;
-      el.style.opacity='1';
-      found=true;
-      if(keys['e']&&!prevKeys['e']){
-        if(points>=br.cost){
-          points-=br.cost;
-          br.open=true;
-          sfxBuy();
-          floatingTexts.push({x:bx,y:by-20,text:'Door Opened!',life:1.5,maxLife:1.5,color:'#66ff66',size:18});
-        }
-      }
-      break;
-    }
-  }
-  if(!found)el.style.opacity='0';
-}
-let prevKeys={};
-
-
-// --- Render ---
-function render(){
-  ctx.fillStyle='#111';
-  ctx.fillRect(0,0,canvas.width,canvas.height);
-
-  ctx.save();
-  const shakeX=camera.shake*(Math.random()-0.5)*2;
-  const shakeY=camera.shake*(Math.random()-0.5)*2;
-  ctx.translate(canvas.width/2-camera.x+shakeX,canvas.height/2-camera.y+shakeY);
-
-  // Floor grid
-  ctx.strokeStyle='rgba(255,255,255,0.03)';
-  ctx.lineWidth=1;
-  const startX=Math.floor((camera.x-canvas.width/2)/TILE)*TILE;
-  const startY=Math.floor((camera.y-canvas.height/2)/TILE)*TILE;
-  for(let x=startX;x<camera.x+canvas.width/2+TILE;x+=TILE){
-    ctx.beginPath();ctx.moveTo(x,camera.y-canvas.height/2);ctx.lineTo(x,camera.y+canvas.height/2);ctx.stroke();
-  }
-  for(let y=startY;y<camera.y+canvas.height/2+TILE;y+=TILE){
-    ctx.beginPath();ctx.moveTo(camera.x-canvas.width/2,y);ctx.lineTo(camera.x+canvas.width/2,y);ctx.stroke();
-  }
-
-  // Stain particles (under everything)
-  particles.forEach(p=>{
-    if(p.type!=='stain')return;
-    const a=Math.min(1,p.life/p.maxLife);
-    ctx.fillStyle=p.color;
-    ctx.globalAlpha=a*0.5;
-    ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill();
-    ctx.globalAlpha=1;
-  });
-
-  // Walls
-  const walls=getAllWalls();
-  walls.forEach(w=>{
-    ctx.fillStyle='#2a2a2a';
-    ctx.fillRect(w.x,w.y,w.w,w.h);
-    ctx.strokeStyle='rgba(255,100,100,0.15)';
-    ctx.lineWidth=1;
-    ctx.strokeRect(w.x,w.y,w.w,w.h);
-  });
-
-  // Barriers (closed)
-  barriers.forEach(b=>{
-    if(b.open)return;
-    ctx.fillStyle='#553300';
-    ctx.fillRect(b.x,b.y,b.w,b.h);
-    ctx.strokeStyle='#ffcc00';
-    ctx.lineWidth=2;
-    ctx.strokeRect(b.x,b.y,b.w,b.h);
-  });
-
-  // Wall buy markers
-  wallBuys.forEach(wb=>{
-    ctx.save();
-    ctx.strokeStyle='#ffcc00';
-    ctx.lineWidth=2;
-    ctx.shadowColor='#ffcc00';
-    ctx.shadowBlur=10;
-    ctx.strokeRect(wb.x-15,wb.y-15,30,30);
-    ctx.fillStyle='#ffcc00';
-    ctx.font='bold 10px Courier New';
-    ctx.textAlign='center';
-    ctx.fillText('$',wb.x,wb.y+4);
-    ctx.restore();
-  });
-
-  // Zombies
-  zombies.forEach(z=>{
-    ctx.save();
-    ctx.translate(z.x,z.y);
-    ctx.rotate(z.angle);
-    // Body
-    const baseCol=z.type==='brute'?'#664422':z.type==='runner'?'#227733':'#335533';
-    const col=z.flash>0?lerpColor(baseCol,'#ffffff',z.flash):baseCol;
-    ctx.fillStyle=col;
-    ctx.shadowColor=z.type==='runner'?'#44ff44':'#ff4444';
-    ctx.shadowBlur=z.flash>0?20:8;
-    ctx.beginPath();ctx.arc(0,0,z.radius,0,Math.PI*2);ctx.fill();
-    // Eyes
-    ctx.fillStyle='#ff2222';
-    ctx.shadowColor='#ff0000';
-    ctx.shadowBlur=6;
-    ctx.beginPath();ctx.arc(z.radius*0.4,-z.radius*0.3,3,0,Math.PI*2);ctx.fill();
-    ctx.beginPath();ctx.arc(z.radius*0.4,z.radius*0.3,3,0,Math.PI*2);ctx.fill();
-    // Arms
-    ctx.strokeStyle=col;
-    ctx.lineWidth=4;
-    ctx.lineCap='round';
-    ctx.beginPath();ctx.moveTo(z.radius*0.5,-z.radius*0.7);ctx.lineTo(z.radius+8,-z.radius*0.5);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(z.radius*0.5,z.radius*0.7);ctx.lineTo(z.radius+8,z.radius*0.5);ctx.stroke();
-    ctx.shadowBlur=0;
-    // Health bar
-    if(z.health<z.maxHealth){
-      const bw=z.radius*2;
-      const hp=z.health/z.maxHealth;
-      ctx.fillStyle='rgba(0,0,0,0.5)';
-      ctx.fillRect(-bw/2,-z.radius-10,bw,4);
-      ctx.fillStyle=z.type==='brute'?'#ff8844':'#ff4444';
-      ctx.fillRect(-bw/2,-z.radius-10,bw*hp,4);
-    }
-    ctx.restore();
-  });
-
-  // Bullets
-  bullets.forEach(b=>{
-    ctx.fillStyle=b.color;
-    ctx.shadowColor=b.color;
-    ctx.shadowBlur=8;
-    ctx.beginPath();ctx.arc(b.x,b.y,b.radius,0,Math.PI*2);ctx.fill();
-    // Trail
-    ctx.strokeStyle=b.color;
-    ctx.globalAlpha=0.3;
-    ctx.lineWidth=b.radius;
-    ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.lineTo(b.x-b.vx*0.5,b.y-b.vy*0.5);ctx.stroke();
-    ctx.globalAlpha=1;
-  });
-  ctx.shadowBlur=0;
-
-  // Particles (non-stain)
-  particles.forEach(p=>{
-    if(p.type==='stain')return;
-    const a=p.life/p.maxLife;
-    ctx.globalAlpha=a;
-    ctx.fillStyle=p.color;
-    if(p.type==='spark'){
-      ctx.shadowColor=p.color;ctx.shadowBlur=6;
-    }
-    ctx.beginPath();ctx.arc(p.x,p.y,p.size*a,0,Math.PI*2);ctx.fill();
-    ctx.shadowBlur=0;
-    ctx.globalAlpha=1;
-  });
-
-  // Player
-  ctx.save();
-  ctx.translate(player.x,player.y);
-  ctx.rotate(player.angle);
-  // Body
-  ctx.fillStyle=player.invincible>0&&Math.floor(Date.now()/80)%2?'#ffffff':'#cccccc';
-  ctx.shadowColor='#4488ff';
-  ctx.shadowBlur=12;
-  ctx.beginPath();ctx.arc(0,0,player.radius,0,Math.PI*2);ctx.fill();
-  // Gun
-  const w2=WEAPONS[player.weapon];
-  ctx.fillStyle='#888';
-  ctx.shadowBlur=0;
-  const gunLen=player.radius+12;
-  ctx.fillRect(player.radius-4,-3,gunLen-player.radius+8,6);
-  // Eyes (visor)
-  ctx.fillStyle='#4488ff';
-  ctx.shadowColor='#4488ff';
-  ctx.shadowBlur=8;
-  ctx.fillRect(player.radius*0.3,-player.radius*0.35,6,player.radius*0.7);
-  ctx.shadowBlur=0;
-  ctx.restore();
-
-  // Floating texts
-  floatingTexts.forEach(ft=>{
-    const a=ft.life/ft.maxLife;
-    ctx.globalAlpha=a;
-    ctx.fillStyle=ft.color;
-    ctx.font='bold '+ft.size+'px Courier New';
-    ctx.textAlign='center';
-    ctx.shadowColor=ft.color;
-    ctx.shadowBlur=10;
-    ctx.fillText(ft.text,ft.x,ft.y);
-    ctx.shadowBlur=0;
-    ctx.globalAlpha=1;
-  });
-
-  ctx.restore();
-
-  // Reload indicator
-  if(player.reloading){
-    const w3=WEAPONS[player.weapon];
-    const pct=1-player.reloadTimer/(w3.reloadTime/1000);
-    ctx.fillStyle='rgba(0,0,0,0.5)';
-    ctx.fillRect(canvas.width/2-50,canvas.height/2+40,100,8);
-    ctx.fillStyle='#ffcc00';
-    ctx.fillRect(canvas.width/2-50,canvas.height/2+40,100*pct,8);
-    ctx.fillStyle='#ffcc00';
-    ctx.font='12px Courier New';
-    ctx.textAlign='center';
-    ctx.fillText('RELOADING',canvas.width/2,canvas.height/2+38);
   }
 }
 
-function lerpColor(a,b,t){
-  const ah=parseInt(a.slice(1),16),bh=parseInt(b.slice(1),16);
-  const ar=(ah>>16)&0xff,ag=(ah>>8)&0xff,ab=ah&0xff;
-  const br2=(bh>>16)&0xff,bg=(bh>>8)&0xff,bb=bh&0xff;
-  const rr=Math.round(ar+(br2-ar)*t);
-  const rg=Math.round(ag+(bg-ag)*t);
-  const rb=Math.round(ab+(bb-ab)*t);
-  return '#'+((1<<24)+(rr<<16)+(rg<<8)+rb).toString(16).slice(1);
+function switchWeapon(){
+  if(player.weapons.length<2)return;
+  const idx=player.weapons.indexOf(player.wpn);
+  player.wpn=player.weapons[(idx+1)%player.weapons.length];
+  const w=WEAPONS[player.wpn];
+  player.mag=w.mag;
+  player.reserve=player.wpn==='pistol'?Infinity:w.reserve;
+  player.reloading=false;
+  player.rTimer=0;
+  gunReloadAnim=0;
 }
 
-// --- Game Over ---
-function showGameOver(){
-  setTimeout(()=>{
-    const ov=document.getElementById('overlay');
-    ov.classList.remove('hidden');
-    ov.innerHTML=`
-      <h1 style="color:#ff2222">YOU DIED</h1>
-      <div class="subtitle">THE HORDE OVERWHELMED YOU</div>
-      <div class="stats">
-        Survived to <span>Round ${round}</span><br>
-        <span>${kills}</span> zombies killed<br>
-        <span>${points}</span> points earned
-      </div>
-      <button class="start-btn" id="restart-btn" style="margin-top:30px;">FIGHT AGAIN</button>
-    `;
-    document.getElementById('restart-btn').addEventListener('click',()=>{
-      ov.classList.add('hidden');
-      setTimeout(()=>{
-        ov.innerHTML=`
-          <h1>UNDEAD SIEGE</h1>
-          <div class="subtitle">SURVIVE THE HORDE</div>
-          <button class="start-btn" id="start-btn">ENLIST</button>
-          <div style="margin-top:20px;color:#666;font-size:12px;letter-spacing:2px;">WASD + MOUSE · R TO RELOAD · E TO BUY</div>
-        `;
-        startGame();
-      },500);
-    });
-  },1500);
+// ── Render floating text ──
+function drawFloats(){
+  for(const f of floats){
+    const a=f.life/f.maxLife;
+    X.globalAlpha=a;
+    X.fillStyle=f.color;
+    X.font='bold 14px Courier New';
+    X.textAlign='center';
+    X.fillText(f.text,f.x,H/2-30+f.offy);
+    X.globalAlpha=1;
+  }
 }
 
+// ── Wall buy markers in 3D ──
+function drawWallBuyMarkers(){
+  for(const wb of WALLBUYS){
+    const dx=(wb.mx+0.5)-player.x;
+    const dy=(wb.my+0.5)-player.y;
+    const d=Math.hypot(dx,dy);
+    if(d>8)continue;
+    let relA=Math.atan2(dy,dx)-player.a;
+    while(relA>Math.PI)relA-=2*Math.PI;
+    while(relA<-Math.PI)relA+=2*Math.PI;
+    if(Math.abs(relA)>HALF_FOV)continue;
+    
+    const sx=((relA/FOV+0.5)*W)|0;
+    const sz=Math.min(H,(H*0.3/d)|0);
+    const sy=((H-sz)/2)|0;
+    
+    if(d<zBuf[Math.max(0,Math.min(W-1,sx))]){
+      X.fillStyle='rgba(255,204,0,0.4)';
+      X.fillRect(sx-sz/2,sy,sz,sz);
+      X.strokeStyle='#fc0';
+      X.lineWidth=2;
+      X.strokeRect(sx-sz/2,sy,sz,sz);
+      X.fillStyle='#fc0';
+      X.font='bold '+Math.max(6,Math.min(14,(80/d)|0))+'px Courier New';
+      X.textAlign='center';
+      X.fillText('$',sx,sy+sz/2+4);
+    }
+  }
+}
 
-// --- Input ---
-let mobileMove={active:false,dx:0,dy:0,id:null};
-let mobileAim={active:false,dx:0,dy:0,id:null};
-let mobileShoot=false;
-
+// ── Input ──
 document.addEventListener('keydown',e=>{
   keys[e.key.toLowerCase()]=true;
-  if(e.key.toLowerCase()==='r')startReload();
+  if(e.key.toLowerCase()==='r')doReload();
   if(e.key.toLowerCase()==='q')switchWeapon();
-  if(e.key===' '){e.preventDefault();shoot();}
+  if(e.key.toLowerCase()==='e')tryBuy();
+  if(e.key===' '){e.preventDefault();}
 });
-document.addEventListener('keyup',e=>{
-  prevKeys[e.key.toLowerCase()]=keys[e.key.toLowerCase()];
-  keys[e.key.toLowerCase()]=false;
-  setTimeout(()=>{prevKeys[e.key.toLowerCase()]=false;},50);
-});
-canvas.addEventListener('mousemove',e=>{mouseX=e.clientX;mouseY=e.clientY;});
-canvas.addEventListener('mousedown',e=>{
-  ensureAudio();mouseDown=true;
-  const w=WEAPONS[player.weapon];
-  if(!w.auto)shoot();
-});
-canvas.addEventListener('mouseup',()=>{mouseDown=false;});
-canvas.addEventListener('contextmenu',e=>e.preventDefault());
-
-// Mobile touch controls
-function setupMobileControls(){
-  const moveZone=document.getElementById('move-stick');
-  const moveKnob=document.getElementById('move-knob');
-  const aimZone=document.getElementById('aim-stick');
-  const aimKnob=document.getElementById('aim-knob');
-  const shootBtn=document.getElementById('shoot-btn');
-
-  function handleJoystick(zone,knob,state,e,touch){
-    const rect=zone.getBoundingClientRect();
-    const cx=rect.left+rect.width/2;
-    const cy=rect.top+rect.height/2;
-    const dx=touch.clientX-cx;
-    const dy=touch.clientY-cy;
-    const dist2=Math.hypot(dx,dy);
-    const maxR=rect.width/2-10;
-    const clamped=Math.min(dist2,maxR);
-    const angle=Math.atan2(dy,dx);
-    state.dx=Math.cos(angle)*(clamped/maxR);
-    state.dy=Math.sin(angle)*(clamped/maxR);
-    state.active=true;
-    const kx=Math.cos(angle)*clamped;
-    const ky=Math.sin(angle)*clamped;
-    knob.style.transform=`translate(calc(-50% + ${kx}px), calc(-50% + ${ky}px))`;
+document.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});
+C.addEventListener('mousedown',e=>{
+  audio();mouseBtn=true;
+  if(!locked&&state==='playing'){
+    C.requestPointerLock&&C.requestPointerLock();
   }
+});
+C.addEventListener('mouseup',()=>{mouseBtn=false;});
+document.addEventListener('mousemove',e=>{
+  if(document.pointerLockElement===C||locked){
+    player.a+=e.movementX*0.003;
+  }
+});
+document.addEventListener('pointerlockchange',()=>{
+  locked=document.pointerLockElement===C;
+  document.getElementById('crosshair').style.display=locked?'block':'none';
+});
 
-  moveZone.addEventListener('touchstart',e=>{
-    e.preventDefault();ensureAudio();
-    const t=e.changedTouches[0];mobileMove.id=t.identifier;
-    handleJoystick(moveZone,moveKnob,mobileMove,e,t);
-  },{passive:false});
-  moveZone.addEventListener('touchmove',e=>{
-    e.preventDefault();
-    for(const t of e.changedTouches){
-      if(t.identifier===mobileMove.id)handleJoystick(moveZone,moveKnob,mobileMove,e,t);
-    }
-  },{passive:false});
-  moveZone.addEventListener('touchend',e=>{
-    for(const t of e.changedTouches){
-      if(t.identifier===mobileMove.id){
-        mobileMove.active=false;mobileMove.dx=0;mobileMove.dy=0;mobileMove.id=null;
-        moveKnob.style.transform='translate(-50%,-50%)';
-      }
-    }
-  });
-
-  aimZone.addEventListener('touchstart',e=>{
-    e.preventDefault();
-    const t=e.changedTouches[0];mobileAim.id=t.identifier;
-    handleJoystick(aimZone,aimKnob,mobileAim,e,t);
-  },{passive:false});
-  aimZone.addEventListener('touchmove',e=>{
-    e.preventDefault();
-    for(const t of e.changedTouches){
-      if(t.identifier===mobileAim.id)handleJoystick(aimZone,aimKnob,mobileAim,e,t);
-    }
-  },{passive:false});
-  aimZone.addEventListener('touchend',e=>{
-    for(const t of e.changedTouches){
-      if(t.identifier===mobileAim.id){
-        mobileAim.active=false;mobileAim.dx=0;mobileAim.dy=0;mobileAim.id=null;
-        aimKnob.style.transform='translate(-50%,-50%)';
-      }
-    }
-  });
-
-  shootBtn.addEventListener('touchstart',e=>{e.preventDefault();ensureAudio();mobileShoot=true;},{passive:false});
-  shootBtn.addEventListener('touchend',e=>{mobileShoot=false;});
-}
-
-// --- Game Loop ---
-function gameLoop(time){
-  dt=Math.min((time-lastTime)/1000,0.05);
-  lastTime=time;
-  update();
-  render();
-  requestAnimationFrame(gameLoop);
+// ── Main loop ──
+function loop(t){
+  dt=Math.min((t-lastT)/1000,0.05);
+  lastT=t;
+  
+  if(state!=='menu'){
+    update();
+    castRays();
+    renderSprites();
+    drawWallBuyMarkers();
+    drawGun();
+    drawHUD();
+    drawFloats();
+  }
+  
+  requestAnimationFrame(loop);
 }
 
 function startGame(){
+  document.getElementById('overlay').classList.add('hidden');
+  document.getElementById('crosshair').style.display='block';
   initGame();
-  document.getElementById('hud').classList.add('show');
-  document.getElementById('health-bar-container').style.opacity='1';
-  const ov=document.getElementById('overlay');
-  ov.classList.add('hidden');
-  state=STATE.ROUND_TRANSITION;
+  C.requestPointerLock&&C.requestPointerLock();
 }
 
-// --- Boot ---
-document.getElementById('start-btn').addEventListener('click',()=>{
-  ensureAudio();
-  startGame();
-});
-
-setupMobileControls();
-lastTime=performance.now();
-requestAnimationFrame(gameLoop);
+// Boot
+document.getElementById('crosshair').style.display='none';
+lastT=performance.now();
+requestAnimationFrame(loop);
 
 </script>
 </body>
