@@ -2,14 +2,13 @@
 
 # 🧟 UNDEAD SIEGE
 
-**Top-down zombie survival. Old school. No mercy.**
+**First-person zombie survival. Old school. No mercy.**
 
 [![Play Now](https://img.shields.io/badge/%E2%96%B6%EF%B8%8F_PLAY_NOW-ff2222?style=for-the-badge&logoColor=white)](https://itsababseh.github.io/undead-siege/)
 
 [![Built with AutoGPT AutoPilot](https://img.shields.io/badge/built_with-AutoGPT_AutoPilot-7c3aed?style=flat-square)](https://agpt.co)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-0-22c55e?style=flat-square)](.)
 [![One File](https://img.shields.io/badge/files-1-3b82f6?style=flat-square)](./index.html)
-[![Build Time](https://img.shields.io/badge/build_time-~3_min-f59e0b?style=flat-square)](.)
 
 ---
 
@@ -17,30 +16,31 @@
 
 ## The Story
 
-Someone said *"I miss old school zombies from Call of Duty"* and an AI built this entire game — from scratch, in a single conversation.
+Someone said *"I miss old school zombies from Call of Duty"* and an AI built this entire game — a first-person raycasting shooter, from scratch, in a single conversation.
 
-No frameworks. No build tools. No npm install. Just one HTML file, a canvas, and the overwhelming urge to survive one more round.
+No frameworks. No build tools. No npm install. Just one HTML file with a Wolfenstein-style 3D engine, zombies shambling toward you with glowing red eyes, and a gun in your hands.
 
 ## What Is This?
 
-A top-down zombie survival shooter inspired by the classic Call of Duty Zombies mode. Rounds escalate. Zombies get faster and tougher. You earn points, buy weapons off the wall, open doors to new areas, and try not to die.
+A first-person zombie survival shooter inspired by classic Call of Duty Zombies. You're dropped into a room. Zombies come in waves. You shoot them. You earn points. You buy better guns off the wall. You try to survive.
 
-**WASD** to move. **Mouse** to aim and shoot. **R** to reload. **E** to buy. **Q** to switch weapons. That's it. You already know how to play.
+**WASD** to move. **Mouse** to aim. **Click** to shoot. **R** to reload. **E** to buy. **1-3** to switch weapons. That's it.
 
 ## What's Inside
 
-- 🎮 Full round-based survival system with escalating difficulty
-- 🔫 5 weapons: Pistol, MP40, Trench Gun, M1 Garand, MG42 — each with unique stats
-- 🚪 Buyable doors that open new areas of the map
-- 💰 Points economy: kills earn points, points buy guns and access
-- 🧟 3 zombie types: Normal, Runner (fast + fragile), Brute (slow + tanky)
-- 🎵 Synthesized sound effects (gunshots, reloads, kills, round transitions)
-- ✨ Particle systems: muzzle flash, blood splatter, ground stains, floating damage numbers
-- 📱 Mobile support with dual-stick touch controls
-- 🎯 Screen shake, damage flash, glow effects — maximum juice
-- 📐 Full map with rooms, corridors, and strategic chokepoints
+- 🎮 **Raycasting 3D engine** — Wolfenstein/DOOM-style first-person view rendered column-by-column
+- 🧟 **Zombie sprites** — procedurally drawn humanoid figures with glowing red eyes, health bars, hit flash
+- 🔫 **3 weapons** — M1911 (pistol), MP40 (SMG), Shotgun — each with unique fire rate, damage, spread, and magazine size
+- 💰 **Points economy** — kills earn points, points buy guns off the wall
+- 🔄 **Round system** — escalating zombie count, speed, and health each round
+- 🎵 **Synthesized sound effects** — gunshots, reloads, hits, kills, round transitions
+- ✨ **Muzzle flash, gun bob, recoil kick, reload animation**
+- ❤️ **Health bar, damage flash, death screen with stats**
+- 🎯 **Hitscan shooting** with per-weapon spread and wall occlusion checks
+- 🗺️ **Procedural wall textures** — brick, wood, stone patterns generated at runtime
+- 🖱️ **Pointer lock** for true FPS mouse control
 
-All in **36KB of a single HTML file**.
+All in **one HTML file. Zero dependencies.**
 
 ## Run Locally
 
@@ -62,6 +62,6 @@ MIT — do whatever you want with it.
 
 Made with ✨ by **AutoGPT AutoPilot** × **itsababseh**
 
-*"I miss old school zombies from Call of Duty" → playable game in one conversation*
+*"I miss old school zombies from Call of Duty" → playable FPS game in one conversation*
 
 </div>
