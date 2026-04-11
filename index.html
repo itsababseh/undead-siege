@@ -285,6 +285,12 @@ function nextRound(){
   sfxRound();
 }
 
+// CoD-style difficulty tier based on round milestones
+function getDifficultyTier(){
+  var tier=Math.floor((round-1)/5); // 0 for r1-5, 1 for r6-10, etc.
+  return tier;
+}
+
 function spawnZombie(){
   // Weighted random: prefer spawns farther from player, but with randomness
   var candidates=[];
@@ -303,15 +309,19 @@ function spawnZombie(){
   var pick=candidates[Math.floor(Math.random()*poolSize)];
   var best=pick.s;
 
-  var hp=50+round*20;
-  var spd=50+Math.min(round*5,90)+Math.random()*20;
-  var dmg=10+round*3;
+  // Progressive difficulty: base linear scaling + exponential tier jumps every 5 rounds
+  var tier=getDifficultyTier();
+  var tierMult=1+tier*0.5; // 1x, 1.5x, 2x, 2.5x, 3x...
+  var hp=Math.floor((50+round*20)*tierMult);
+  var baseSpd=50+Math.min(round*5,90)+Math.random()*20;
+  var spd=baseSpd+tier*15; // faster each tier
+  var dmg=Math.floor((10+round*3)*(1+tier*0.3));
   var z={
     x:best.x+(Math.random()-0.5)*40,
     y:best.y+(Math.random()-0.5)*40,
     hp:hp,maxHp:hp,spd:spd,dmg:dmg,
     angle:0,atkTimer:1,flash:0,
-    radius:12,
+    radius:12,isBoss:false,
   };
   zombies.push(z);
   zSpawned++;
@@ -826,6 +836,15 @@ function drawHUD(){
     ctx.fillStyle='rgba(150,150,150,'+Math.min(1,roundIntroTimer)*0.7+')';
     ctx.font='14px Courier New';
     ctx.fillText(zToSpawn+' zombies',screenW/2,screenH/2+15);
+    // Show tier milestone notification every 5 rounds
+    if(round%5===1&&round>1){
+      var tier=getDifficultyTier();
+      var tierNames=['','AGGRESSIVE','FRENZIED','NIGHTMARE','HELLISH','DEMONIC'];
+      var tname=tier<tierNames.length?tierNames[tier]:'APOCALYPSE';
+      ctx.fillStyle='rgba(255,100,0,'+Math.min(1,roundIntroTimer)+')';
+      ctx.font='bold 16px Courier New';
+      ctx.fillText('⚠ ZOMBIES ARE NOW '+tname+' ⚠',screenW/2,screenH/2+45);
+    }
   }
 
   // Buy prompts
