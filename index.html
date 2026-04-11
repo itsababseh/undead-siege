@@ -43,29 +43,39 @@ const muteBtn=document.getElementById('muteBtn');
 
 // === CONSTANTS ===
 const TILE=64;
-const MAP_W=16,MAP_H=16;
+const MAP_W=24,MAP_H=24;
 const FOV=60*Math.PI/180;
 const HALF_FOV=FOV/2;
 const PI=Math.PI,PI2=PI*2;
 
-// === MAP: 0=floor, 1-3=wall types ===
-const map=[
-  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-  1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-  1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-  1,0,0,2,2,0,0,0,0,0,0,2,2,0,0,1,
-  1,0,0,2,0,0,0,0,0,0,0,0,2,0,0,1,
-  1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-  1,0,0,0,0,0,3,0,0,3,0,0,0,0,0,1,
-  1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-  1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-  1,0,0,0,0,0,3,0,0,3,0,0,0,0,0,1,
-  1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-  1,0,0,2,0,0,0,0,0,0,0,0,2,0,0,1,
-  1,0,0,2,2,0,0,0,0,0,0,2,2,0,0,1,
-  1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-  1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+// === MAP: 0=floor, 1=grey wall, 2=brown wall, 3=green wall, 4=door1(west), 5=door2(east) ===
+// 24x24 map: center starting room, west wing behind door1, east wing behind door2
+var map=[
+//0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3
+  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, //0
+  1,3,3,3,3,3,3,3,3,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1, //1
+  1,3,0,0,0,0,0,0,3,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1, //2
+  1,3,0,0,0,0,0,0,3,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1, //3
+  1,3,0,0,0,0,0,0,3,1,0,0,2,2,0,0,0,0,2,2,0,0,0,1, //4
+  1,3,0,0,0,0,0,0,3,1,0,0,2,0,0,0,0,0,0,2,0,0,0,1, //5
+  1,3,0,0,0,0,0,0,3,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1, //6
+  1,3,0,0,0,0,0,0,3,4,0,0,0,0,0,3,3,0,0,0,0,0,0,1, //7
+  1,3,0,0,0,0,0,0,3,4,0,0,0,0,0,0,0,0,0,0,0,0,0,1, //8
+  1,3,3,3,3,3,3,3,3,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1, //9
+  1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,1, //10
+  1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,2,1, //11
+  1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,1, //12
+  1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,1, //13
+  1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1, //14
+  1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1, //15
+  1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1, //16
+  1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,0,0,0,1,0,0,1, //17
+  1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,2,1, //18
+  1,0,0,2,2,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,1,1,1,1, //19
+  1,0,0,2,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,1, //20
+  1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1, //21
+  1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1, //22
+  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, //23
 ];
 
 function mapAt(x,y){
@@ -74,7 +84,8 @@ function mapAt(x,y){
   return map[my*MAP_W+mx];
 }
 
-const wallColors=[[100,100,100],[80,60,40],[60,90,60]];
+// Wall colors: 1=grey, 2=brown, 3=green, 4=door1(red/rusty), 5=door2(red/rusty)
+const wallColors=[[100,100,100],[80,60,40],[60,90,60],[140,50,30],[140,50,30]];
 
 // === AUDIO SYSTEM ===
 let actx;
@@ -254,8 +265,8 @@ const weapons=[
   {name:'Shotgun',dmg:120,rate:0.7,mag:6,maxAmmo:54,reload:2.5,auto:false,spread:0.1,pellets:5,color:'#f84'},
 ];
 const wallBuys=[
-  {tx:3,ty:3,wi:1,cost:1000},
-  {tx:12,ty:3,wi:2,cost:1500},
+  {tx:12,ty:4,wi:1,cost:1000},  // MP40 near top pillars
+  {tx:12,ty:19,wi:2,cost:1500}, // Shotgun near bottom pillars
 ];
 
 // === PERK VENDING MACHINES (CoD Zombies style) ===
@@ -269,27 +280,31 @@ const perks=[
   {id:'quickrevive',name:'Quick Revive',desc:'HP Regen',cost:1500,color:'#4af',minRound:1,
    apply:function(){player.hpRegen=true;}},
 ];
-// Perk machine positions (tile coords) - near walls for visual placement
+// Perk machine positions (tile coords) - spread across map
 const perkMachines=[
-  {tx:1,ty:7,perkIdx:0},  // Juggernog - left wall middle
-  {tx:14,ty:7,perkIdx:1}, // Speed Cola - right wall middle
-  {tx:7,ty:1,perkIdx:2},  // Double Tap - top wall middle
-  {tx:7,ty:14,perkIdx:3}, // Quick Revive - bottom wall middle
+  {tx:10,ty:11,perkIdx:0}, // Juggernog - main room left
+  {tx:19,ty:6,perkIdx:1},  // Speed Cola - main room right
+  {tx:5,ty:5,perkIdx:2},   // Double Tap - west wing (need door)
+  {tx:22,ty:15,perkIdx:3}, // Quick Revive - east chamber (need door)
 ];
 
-// Expanded spawn positions with more variety
+// Spawn positions: main room + wing rooms (wing spawns only active when door opened)
 const spawnPts=[
-  {x:1.5*TILE,y:1.5*TILE},{x:14.5*TILE,y:1.5*TILE},
-  {x:1.5*TILE,y:14.5*TILE},{x:14.5*TILE,y:14.5*TILE},
-  {x:8*TILE,y:1.5*TILE},{x:8*TILE,y:14.5*TILE},
-  {x:1.5*TILE,y:8*TILE},{x:14.5*TILE,y:8*TILE},
-  // Additional spawn points for variety
-  {x:4*TILE,y:1.5*TILE},{x:12*TILE,y:1.5*TILE},
-  {x:4*TILE,y:14.5*TILE},{x:12*TILE,y:14.5*TILE},
-  {x:1.5*TILE,y:4*TILE},{x:14.5*TILE,y:4*TILE},
-  {x:1.5*TILE,y:12*TILE},{x:14.5*TILE,y:12*TILE},
-  {x:5*TILE,y:5*TILE},{x:11*TILE,y:5*TILE},
-  {x:5*TILE,y:11*TILE},{x:11*TILE,y:11*TILE},
+  // Main room spawns (always active - large central area rows 1-22, cols 10-19)
+  {x:11*TILE,y:1.5*TILE,door:null},{x:18*TILE,y:1.5*TILE,door:null},
+  {x:11*TILE,y:9*TILE,door:null},{x:18*TILE,y:9*TILE,door:null},
+  {x:15*TILE,y:5*TILE,door:null},{x:13*TILE,y:7*TILE,door:null},
+  {x:1.5*TILE,y:11*TILE,door:null},{x:1.5*TILE,y:20*TILE,door:null},
+  {x:8*TILE,y:22*TILE,door:null},{x:15*TILE,y:22*TILE,door:null},
+  {x:19*TILE,y:20*TILE,door:null},{x:5*TILE,y:15*TILE,door:null},
+  {x:10*TILE,y:18*TILE,door:null},{x:17*TILE,y:15*TILE,door:null},
+  // West wing spawns (only when west door opened)
+  {x:3*TILE,y:2.5*TILE,door:'west'},{x:7*TILE,y:2.5*TILE,door:'west'},
+  {x:3*TILE,y:5*TILE,door:'west'},{x:5*TILE,y:8*TILE,door:'west'},
+  {x:7*TILE,y:5*TILE,door:'west'},{x:2*TILE,y:7*TILE,door:'west'},
+  // East chamber spawns (only when east door opened)
+  {x:22*TILE,y:12*TILE,door:'east'},{x:22*TILE,y:16*TILE,door:'east'},
+  {x:21.5*TILE,y:14*TILE,door:'east'},{x:22*TILE,y:18*TILE,door:'east'},
 ];
 
 function resize(){
@@ -304,7 +319,7 @@ resize();
 // === INIT ===
 function initGame(){
   player={
-    x:8*TILE,y:8*TILE,angle:0,
+    x:12*TILE,y:12*TILE,angle:0,
     hp:100,maxHp:100,
     curWeapon:0,
     mag:weapons[0].mag,
@@ -322,6 +337,14 @@ function initGame(){
   };
   zombies=[];bullets=[];particles=[];texts=[];
   round=0;points=500;totalKills=0;
+  // Reset doors
+  for(var di=0;di<doors.length;di++){
+    doors[di].opened=false;
+    for(var dt=0;dt<doors[di].tiles.length;dt++){
+      var dx=doors[di].tiles[dt][0],dy=doors[di].tiles[dt][1];
+      map[dy*MAP_W+dx]=(doors[di].id==='west'?4:5);
+    }
+  }
   zToSpawn=0;zSpawned=0;maxAlive=0;spawnTimer=0;
   dmgFlash=0;gunKick=0;gunBob=0;
   prevKeys={};
@@ -350,6 +373,12 @@ function spawnZombie(){
   var candidates=[];
   for(var i=0;i<spawnPts.length;i++){
     var s=spawnPts[i];
+    // Check if spawn requires an opened door
+    if(s.door){
+      var doorOpen=false;
+      for(var di=0;di<doors.length;di++){if(doors[di].id===s.door&&doors[di].opened)doorOpen=true;}
+      if(!doorOpen)continue;
+    }
     if(mapAt(s.x,s.y)===0){
       var d=Math.hypot(s.x-player.x,s.y-player.y);
       candidates.push({s:s,d:d});
@@ -853,8 +882,39 @@ function tryBuy(){
   tryBuyDoor();
 }
 
+// === BUYABLE DOORS ===
+var doors=[
+  {id:'west',tiles:[[9,7],[9,8]],cost:1250,opened:false,label:'West Wing'},
+  {id:'east',tiles:[[20,12],[20,13]],cost:2000,opened:false,label:'East Chamber'},
+];
+
 function tryBuyDoor(){
-  // Placeholder for Feature 5
+  for(var i=0;i<doors.length;i++){
+    var door=doors[i];
+    if(door.opened)continue;
+    for(var t=0;t<door.tiles.length;t++){
+      var tx=door.tiles[t][0],ty=door.tiles[t][1];
+      var bx=(tx+0.5)*TILE,by=(ty+0.5)*TILE;
+      var d=Math.hypot(bx-player.x,by-player.y);
+      if(d<TILE*2.5){
+        if(points>=door.cost){
+          points-=door.cost;
+          door.opened=true;
+          // Remove door tiles from map (set to 0)
+          for(var dt=0;dt<door.tiles.length;dt++){
+            var dx=door.tiles[dt][0],dy=door.tiles[dt][1];
+            map[dy*MAP_W+dx]=0;
+          }
+          beep(300,'sine',0.15,0.15);
+          setTimeout(function(){beep(200,'sine',0.2,0.1);},100);
+          texts.push({text:door.label+' OPENED!',x:screenW/2,y:screenH/2-40,life:2.5,color:'#4f4'});
+        }else{
+          texts.push({text:'Need $'+door.cost+' for '+door.label,x:screenW/2,y:screenH/2-40,life:1,color:'#f88'});
+        }
+        return;
+      }
+    }
+  }
 }
 
 function showDeath(){
@@ -1041,6 +1101,30 @@ function drawHUD(){
     }
   }
 
+  // Buy prompts - doors
+  if(!buyPromptShown){
+    for(var i=0;i<doors.length;i++){
+      var door=doors[i];
+      if(door.opened)continue;
+      for(var t=0;t<door.tiles.length;t++){
+        var tx=door.tiles[t][0],ty=door.tiles[t][1];
+        var bx=(tx+0.5)*TILE,by=(ty+0.5)*TILE;
+        var d=Math.hypot(bx-player.x,by-player.y);
+        if(d<TILE*2.5){
+          ctx.fillStyle='rgba(0,0,0,0.6)';
+          ctx.fillRect(screenW/2-140,screenH/2+40,280,24);
+          ctx.fillStyle='#f84';
+          ctx.font='13px Courier New';
+          ctx.textAlign='center';
+          ctx.fillText('[E] Open '+door.label+' - $'+door.cost,screenW/2,screenH/2+56);
+          buyPromptShown=true;
+          break;
+        }
+      }
+      if(buyPromptShown)break;
+    }
+  }
+
   // Owned perks display (bottom left above points)
   var ownedPerks=[];
   for(var i=0;i<perks.length;i++){
@@ -1128,6 +1212,19 @@ function drawMinimap(){
   ctx.moveTo(px,py);
   ctx.lineTo(px+Math.cos(player.angle)*8,py+Math.sin(player.angle)*8);
   ctx.stroke();
+  // Door markers on minimap (blinking red for locked)
+  for(var i=0;i<doors.length;i++){
+    var door=doors[i];
+    if(door.opened)continue;
+    for(var t=0;t<door.tiles.length;t++){
+      var tx=door.tiles[t][0],ty=door.tiles[t][1];
+      var dmx=mmX+(tx+0.5)*tileS;
+      var dmy=mmY+(ty+0.5)*tileS;
+      var blink=Math.sin(Date.now()/300)>0?1:0.4;
+      ctx.fillStyle='rgba(255,80,30,'+blink+')';
+      ctx.fillRect(dmx-2,dmy-2,4,4);
+    }
+  }
   // Perk machine dots on minimap
   for(var i=0;i<perkMachines.length;i++){
     var pm=perkMachines[i];
