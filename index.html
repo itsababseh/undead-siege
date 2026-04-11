@@ -32,6 +32,7 @@ canvas{display:block;cursor:crosshair}
 WASD move · Mouse aim · Click shoot<br>
 R reload · 1-3 switch weapons · E buy
 </div>
+<div id="menuLeaderboard" style="margin-top:18px;color:#888;font-size:11px;letter-spacing:1px"></div>
 </div>
 <button id="muteBtn" title="Toggle Sound">🔊</button>
 <script>
@@ -202,6 +203,34 @@ function sfxZombieAttack(){
     o2.connect(filt2);filt2.connect(g2);g2.connect(masterGain);
     o2.start();o2.stop(actx.currentTime+0.35);
   }catch(e){}
+}
+
+// === LEADERBOARD (localStorage) ===
+function getLeaderboard(){
+  try{
+    var data=localStorage.getItem('undeadSiegeScores');
+    if(data)return JSON.parse(data);
+  }catch(e){}
+  return [];
+}
+function saveScore(roundReached,kills,pts){
+  var board=getLeaderboard();
+  var entry={round:roundReached,kills:kills,points:pts,date:new Date().toLocaleDateString()};
+  board.push(entry);
+  board.sort(function(a,b){return b.round-a.round||b.kills-a.kills||b.points-a.points;});
+  board=board.slice(0,10); // keep top 10
+  try{localStorage.setItem('undeadSiegeScores',JSON.stringify(board));}catch(e){}
+  return board;
+}
+function formatLeaderboard(board,limit){
+  limit=limit||5;
+  var lines=[];
+  for(var i=0;i<Math.min(board.length,limit);i++){
+    var e=board[i];
+    lines.push((i+1)+'. R'+e.round+' · '+e.kills+' kills · '+e.points+' pts');
+  }
+  if(lines.length===0)lines.push('No scores yet');
+  return lines;
 }
 
 // === GAME STATE ===
@@ -829,11 +858,25 @@ function tryBuyDoor(){
 }
 
 function showDeath(){
+  var board=saveScore(round,totalKills,points);
+  var lbLines=formatLeaderboard(board,5);
+  var lbHtml='<div style="margin-top:15px;color:#888;font-size:12px;letter-spacing:1px">🏆 HIGH SCORES</div>';
+  lbHtml+='<div style="color:#aaa;font-size:12px;line-height:1.8;margin-top:6px">';
+  for(var i=0;i<lbLines.length;i++){
+    // Highlight if this run matches
+    var e=board[i];
+    var isThis=(e&&e.round===round&&e.kills===totalKills&&e.points===points);
+    if(isThis)lbHtml+='<div style="color:#fc0;font-weight:bold">'+lbLines[i]+' ← YOU</div>';
+    else lbHtml+='<div>'+lbLines[i]+'</div>';
+  }
+  lbHtml+='</div>';
+
   overlay.classList.remove('hidden');
   overlay.innerHTML='<h1 style="color:#c00">YOU DIED</h1>'+
     '<div class="sub">THE HORDE OVERWHELMED YOU</div>'+
     '<div class="stats">Round <b>'+round+'</b> &middot; <b>'+totalKills+'</b> kills &middot; <b>'+points+'</b> pts</div>'+
-    '<button onclick="startGame()">FIGHT AGAIN</button>';
+    lbHtml+
+    '<button onclick="startGame()" style="margin-top:15px">FIGHT AGAIN</button>';
 }
 
 // === DRAW HUD ===
@@ -1190,6 +1233,18 @@ function startGame(){
 document.getElementById('startBtn').addEventListener('click',startGame);
 lastTime=performance.now();
 requestAnimationFrame(loop);
+
+// Show leaderboard on main menu
+(function(){
+  var lb=document.getElementById('menuLeaderboard');
+  if(!lb)return;
+  var board=getLeaderboard();
+  if(board.length===0){lb.innerHTML='🏆 No high scores yet';return;}
+  var lines=formatLeaderboard(board,5);
+  var html='🏆 HIGH SCORES<br>';
+  for(var i=0;i<lines.length;i++)html+=lines[i]+'<br>';
+  lb.innerHTML=html;
+})();
 
 </script>
 </body>
